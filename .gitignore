@@ -1,0 +1,46 @@
+# System
+.DS_Store
+.idea
+.vscode
+
+# Environments
+.env
+.env.docker
+.env.develop
+.env.stage
+.env.preprod
+.env.production
+
+# Data
+/data/postgres
+
+# Modules
+dist
+node_modules
+
+# Logs
+logs
+*.log
+
+# Tests
+.cache
+/.coverage/clover.xml
+/.coverage/lcov-report
+/.coverage/lcov.info
+/.coverage/coverage-final.json
+/test/unit/**/*.js
+/test/unit/**/*.d.ts
+/test/unit/**/*.js.map
+/test/mocks/**/*.js
+/test/mocks/**/*.d.ts
+/test/mocks/**/*.js.map
+/test/stubs/**/*.js
+/test/stubs/**/*.d.ts
+/test/stubs/**/*.js.map
+test.*
+
+# Misc
+data
+documentation
+tsconfig.tsbuildinfo
+tsconfig.build.tsbuildinfo
