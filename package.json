@@ -13,7 +13,7 @@
     "prepare": "husky install",
     "prebuild": "rimraf dist & jest --clearCache",
     "build": "nest build",
-    "postbuild": "npx compodoc -p tsconfig.doc.json --hideGenerator -n 'Exbay Development guideline' --unitTestCoverage ./.coverage/coverage-summary.json",
+    "postbuild": "npx compodoc -p tsconfig.doc.json --hideGenerator -n 'Fifa Mobile Development guideline'",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "DOTENV_CONFIG_DEBUG=true DOTENV_CONFIG_PATH=./.env node -r dotenv/config ./node_modules/.bin/nest start",
     "start:watch": "DOTENV_CONFIG_DEBUG=false DOTENV_CONFIG_PATH=./.env node -r dotenv/config ./node_modules/.bin/nest start --watch",
