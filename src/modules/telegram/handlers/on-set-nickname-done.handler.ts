@@ -5,6 +5,8 @@ import { TelegramConfigType } from '../../../configs/types/telegram.config.type'
 import { MemoryDbStorageProvider } from '../../storage/providers/memory-db.provider';
 import { NICKNAME_COMMAND } from '../commands';
 import { ERROR_GAP_MESSAGE, ON_SET_NICKNAME_DONE_MESSAGE } from '../messages';
+import {PlayerRepository} from "../repositories/player.repository";
+import {isEmpty} from "../../../common/utils/string.util";
 
 @Injectable()
 export class OnSetNicknameDoneHandler {
@@ -12,8 +14,9 @@ export class OnSetNicknameDoneHandler {
    * OnSetNicknameDone event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
-   * @param {MemoryDbStorageProvider} session
    * @param {TelegramConfigType} config
+   * @param {MemoryDbStorageProvider} session
+   * @param {PlayerRepository} playerRepository
    * @param {Logger} logger
    */
   constructor(
@@ -21,20 +24,33 @@ export class OnSetNicknameDoneHandler {
     msg: Message,
     config: TelegramConfigType,
     session: MemoryDbStorageProvider,
+    playerRepository: PlayerRepository,
     logger: Logger,
   ) {
     if (session.get(msg.chat.id) === NICKNAME_COMMAND.COMMAND) {
-      void bot
-        .sendMessage(
-          msg.chat.id,
-          message(ON_SET_NICKNAME_DONE_MESSAGE, {
-            username: msg.from.first_name,
-          }),
-          {
-            parse_mode: config.getMessageParseMode(),
-          },
-        )
-        .catch((error) => {
+      playerRepository.findOneAndUpdate({
+        telegramUserId: msg.from.id
+      }, {
+        telegramChannelId: config.getNotificationChannel(),
+        playerNickname: msg.text,
+        telegramFirstName: msg.from.first_name,
+      }).then(result => isEmpty(result) ? playerRepository.create({
+            telegramChannelId: config.getNotificationChannel(),
+            telegramUserId: msg.from.id,
+            telegramFirstName: msg.from.first_name,
+            telegramUsername: msg.from.username,
+            playerNickname: msg.text
+          }) : result
+      ).then(_ => bot
+          .sendMessage(
+              msg.chat.id,
+              message(ON_SET_NICKNAME_DONE_MESSAGE, {
+                username: msg.from.first_name,
+              }),
+              {
+                parse_mode: config.getMessageParseMode(),
+              },
+          )).catch((error) => {
           logger.error(error);
           void bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
             parse_mode: config.getMessageParseMode(),

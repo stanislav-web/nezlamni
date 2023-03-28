@@ -19,10 +19,10 @@ export default registerAs(
       parseInt(getEnv('TELEGRAM_WEBHOOK_PORT', true)),
     /**
      * Get Telegram channel for notifications
-     * @return {string}
+     * @return {number}
      */
-    getNotificationChannel: (): string =>
-      getEnv('TELEGRAM_NOTIFICATIONS_CHANNEL', true),
+    getNotificationChannel: (): number =>
+      parseInt(getEnv('TELEGRAM_NOTIFICATIONS_CHANNEL', true)),
     /**
      * Get api pooling timeout (ms)
      * @return {number}

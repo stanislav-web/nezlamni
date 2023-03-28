@@ -30,9 +30,9 @@ export type TelegramConfigType = {
   getMessageParseMode(): ParseMode;
   /**
    * Get Telegram channel for notifications
-   * @return {string}
+   * @return {number}
    */
-  getNotificationChannel(): string;
+  getNotificationChannel(): number;
 
   /**
    * Get pooling interval (sec)

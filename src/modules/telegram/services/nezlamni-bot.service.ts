@@ -22,6 +22,7 @@ import {
   OnSetNicknameHandler,
   OnStartHandler,
 } from '../handlers';
+import {PlayerRepository} from "../repositories/player.repository";
 
 @Injectable()
 export class NezlamniBotService {
@@ -41,12 +42,14 @@ export class NezlamniBotService {
    * Constructor
    * @param {ConfigType<typeof telegramConfig>} telegramConf
    * @param {MemoryDbStorageProvider} session
+   * @param {PlayerRepository} playerRepository
    */
   constructor(
     @Inject(telegramConfig.KEY)
     private readonly telegramConf: ConfigType<typeof telegramConfig>,
     @Inject(MemoryDbStorageProvider)
     private readonly session: MemoryDbStorageProvider,
+    private readonly playerRepository: PlayerRepository,
   ) {
     this.bot = new TelegramBot(this.telegramConf.getToken(), {
       polling: this.telegramConf.isPooling()
@@ -151,14 +154,16 @@ export class NezlamniBotService {
   private onMessage = (msg: Message) => {
     this.logger.debug(`onMessage event`);
     this.logger.log(msg);
-    if (!msg.from.is_bot && msg.chat.type === 'private')
+    if (!msg.from.is_bot && !msg.entities && msg.chat.type === 'private') {
       new OnSetNicknameDoneHandler(
-        this.bot,
-        msg,
-        this.telegramConf,
-        this.session,
-        this.logger,
+          this.bot,
+          msg,
+          this.telegramConf,
+          this.session,
+          this.playerRepository,
+          this.logger,
       );
+    }
   };
 
   private onMemberUpdated = (msg: Message) => {
