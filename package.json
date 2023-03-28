@@ -20,7 +20,6 @@
     "start:watch:debug": "DOTENV_CONFIG_DEBUG=true DOTENV_CONFIG_PATH=./.env node -r dotenv/config ./node_modules/.bin/nest start --debug --watch",
     "start:development": "node dist/src/main",
     "start:stage": "node dist/src/main",
-    "start:preprod": "node dist/src/main",
     "start:production": "node dist/src/main",
     "compodoc": "npx compodoc -p tsconfig.doc.json --hideGenerator -n 'ExBay Development guideline' --unitTestCoverage ./.coverage/coverage-summary.json",
     "lint": "eslint \"{src,test}/**/*.ts\"  -c .eslintrc.js",
