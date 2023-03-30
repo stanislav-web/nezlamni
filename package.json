@@ -58,7 +58,9 @@
     "helmet": "^6.0.1",
     "mongoose": "^7.0.3",
     "node-telegram-bot-api": "^0.61.0",
+    "npm": "^9.6.2",
     "reflect-metadata": "^0.1.13",
+    "table": "^6.8.1",
     "uid": "^2.0.1"
   },
   "devDependencies": {

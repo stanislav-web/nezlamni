@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {HydratedDocument, SchemaTypes, Types} from "mongoose";
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 
 export type PlayerDocument = HydratedDocument<Player>;
 
@@ -14,15 +14,15 @@ export type PlayerDocument = HydratedDocument<Player>;
   timestamps: true,
 })
 export class Player {
-  @Prop({required: true})
+  @Prop({ required: true })
   telegramUserId: number;
-  @Prop({required: true})
+  @Prop({ required: true })
   telegramFirstName: string;
-  @Prop({required: true})
+  @Prop({ required: true })
   telegramUsername: string;
-  @Prop({required: true})
+  @Prop({ required: true })
   telegramChannelId: number;
-  @Prop({ required: false})
+  @Prop({ required: false })
   playerNickname?: string;
 }
 

@@ -36,6 +36,19 @@ export default registerAs(
     getToken: (): string => getEnv('TELEGRAM_TOKEN', true),
 
     /**
+     * Get channel games schedule link
+     * @return {string}
+     */
+    getChannelGamesScheduleLink: (): string =>
+      getEnv('TELEGRAM_CHANNEL_GAMES_SCHEDULE_LINK', true),
+
+    /**
+     * Get bot id
+     * @return {number}
+     */
+    getBotId: (): number => parseInt(getEnv('TELEGRAM_BOT_ID', true)),
+
+    /**
      * Get maximum allowed connections
      * @return number
      */

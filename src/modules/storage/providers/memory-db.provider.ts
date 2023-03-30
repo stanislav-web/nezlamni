@@ -30,13 +30,6 @@ export class MemoryDbStorageProvider {
    * @returns { [p: string]: any }
    */
   put(key: string | number, value: any): { [p: string]: any } {
-    if (this.pool[this.namespace][key]) {
-      throw new MemoryDbErrorException(
-        MemoryDbErrorEnum.ConflictException,
-        `key "${key}" already exist in namespace: ${this.namespace}`,
-      );
-    }
-
     if (Object.keys(this.pool).length >= this.memoryDbStorageConf.getDbSize()) {
       throw new MemoryDbErrorException(
         MemoryDbErrorEnum.LimitExceededException,

@@ -2,17 +2,29 @@ import { ParseMode } from 'node-telegram-bot-api';
 
 export type TelegramConfigType = {
   /**
+   * Get bot id
+   * @return {number}
+   */
+  getBotId(): number;
+  /**
    * Get bot name
    * @return string
    */
   getBotName(): string;
   /**
+   * Get channel games schedule link
+   * @return {string}
+   */
+  getChannelGamesScheduleLink(): string;
+
+  /**
    * Get group admin id
    * @return {number}
    */
   getGroupAdminId(): number;
+
   /**
-   * Get group admin id
+   * Get group admin name
    * @return {string}
    */
   getGroupAdminName(): string;
@@ -22,12 +34,12 @@ export type TelegramConfigType = {
    * @return number
    */
   getMaxAllowedConnections(): number;
-
   /**
    * Get messages parse mode
    * @return {ParseMode}
    */
   getMessageParseMode(): ParseMode;
+
   /**
    * Get Telegram channel for notifications
    * @return {number}

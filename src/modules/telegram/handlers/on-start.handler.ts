@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
-import { NICKNAME_COMMAND, PLAYERS_LIST_COMMAND } from '../commands';
+import {
+  CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
+  NICKNAME_COMMAND_PUBLIC,
+  PLAYERS_LIST_COMMAND_PRIVATE,
+} from '../commands';
 import {
   ERROR_GAP_MESSAGE,
   ON_START_MESSAGE,
@@ -58,14 +62,21 @@ export class OnStartHandler {
               inline_keyboard: [
                 [
                   {
-                    text: NICKNAME_COMMAND.BTN,
-                    callback_data: NICKNAME_COMMAND.COMMAND,
+                    text: NICKNAME_COMMAND_PUBLIC.BTN,
+                    callback_data: NICKNAME_COMMAND_PUBLIC.COMMAND,
                   },
                 ],
                 [
                   {
-                    text: PLAYERS_LIST_COMMAND.BTN,
-                    callback_data: PLAYERS_LIST_COMMAND.COMMAND,
+                    text: PLAYERS_LIST_COMMAND_PRIVATE.BTN,
+                    callback_data: PLAYERS_LIST_COMMAND_PRIVATE.COMMAND,
+                  },
+                ],
+                [
+                  {
+                    text: CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.BTN,
+                    callback_data:
+                      CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND,
                   },
                 ],
               ],

@@ -9,8 +9,12 @@ import { isEmpty } from '../../../common/utils/string.util';
 import { telegramConfig } from '../../../configs';
 import { MemoryDbStorageProvider } from '../../storage/providers/memory-db.provider';
 import {
-  NICKNAME_COMMAND,
-  PLAYERS_LIST_COMMAND,
+  CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
+  CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
+  NICKNAME_COMMAND_PRIVATE,
+  NICKNAME_COMMAND_PUBLIC,
+  PLAYERS_LIST_COMMAND_PRIVATE,
+  PLAYERS_LIST_COMMAND_PUBLIC,
   START_COMMAND,
 } from '../commands';
 import {
@@ -22,7 +26,8 @@ import {
   OnSetNicknameHandler,
   OnStartHandler,
 } from '../handlers';
-import {PlayerRepository} from "../repositories/player.repository";
+import { OnGetChannelScheduleHandler } from '../handlers/on-get-channel-schedule.handler';
+import { PlayerRepository } from '../repositories/player.repository';
 
 @Injectable()
 export class NezlamniBotService {
@@ -65,8 +70,18 @@ export class NezlamniBotService {
 
     this.logger.debug(`${this.telegramConf.getBotName()} has been initialized`);
     this.bot.onText(START_COMMAND.REGEXP, this.onStart);
-    this.bot.onText(NICKNAME_COMMAND.REGEXP, this.onSetNickname);
-    this.bot.onText(PLAYERS_LIST_COMMAND.REGEXP, this.onPlayersList);
+    this.bot.onText(NICKNAME_COMMAND_PUBLIC.REGEXP, this.onSetNickname);
+    this.bot.onText(NICKNAME_COMMAND_PRIVATE.REGEXP, this.onSetNickname);
+    this.bot.onText(PLAYERS_LIST_COMMAND_PUBLIC.REGEXP, this.onPlayersList);
+    this.bot.onText(PLAYERS_LIST_COMMAND_PRIVATE.REGEXP, this.onPlayersList);
+    this.bot.onText(
+      CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.REGEXP,
+      this.onChannelGameSchedule,
+    );
+    this.bot.onText(
+      CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.REGEXP,
+      this.onChannelGameSchedule,
+    );
     this.bot.on('new_chat_members', this.onNewMember);
     this.bot.on('chat_member_updated', this.onMemberUpdated);
     this.bot.on('left_chat_member', this.onMemberLeft);
@@ -94,8 +109,12 @@ export class NezlamniBotService {
    */
   private onSetNickname = (msg: Message) => {
     this.logger.debug(`onSetNickname event`);
-    this.logger.log(msg);
-    if (!msg.from.is_bot && msg.text === NICKNAME_COMMAND.COMMAND)
+    this.logger.log(msg.text);
+    if (
+      !msg.from.is_bot &&
+      (msg.text === NICKNAME_COMMAND_PUBLIC.COMMAND ||
+        msg.text === NICKNAME_COMMAND_PRIVATE.COMMAND)
+    )
       new OnSetNicknameHandler(this.bot, msg, this.telegramConf, this.logger);
   };
 
@@ -106,8 +125,38 @@ export class NezlamniBotService {
   private onPlayersList = (msg: Message) => {
     this.logger.debug(`onPlayersList event`);
     this.logger.log(msg);
-    if (!msg.from.is_bot && msg.text === PLAYERS_LIST_COMMAND.COMMAND)
-      new OnGetPlayersHandler(this.bot, msg, this.telegramConf, this.logger);
+    if (
+      !msg.from.is_bot &&
+      (msg.text === PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
+        msg.text === PLAYERS_LIST_COMMAND_PUBLIC.COMMAND)
+    )
+      new OnGetPlayersHandler(
+        this.bot,
+        msg,
+        this.telegramConf,
+        this.playerRepository,
+        this.logger,
+      );
+  };
+
+  /**
+   * onPlayersList event /players
+   * @param {Message} msg
+   */
+  private onChannelGameSchedule = (msg: Message) => {
+    this.logger.debug(`onChannelGameSchedule event`);
+    this.logger.log(msg);
+    if (
+      !msg.from.is_bot &&
+      (msg.text === CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND ||
+        msg.text === CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.COMMAND)
+    )
+      new OnGetChannelScheduleHandler(
+        this.bot,
+        msg,
+        this.telegramConf,
+        this.logger,
+      );
   };
 
   /**
@@ -127,7 +176,13 @@ export class NezlamniBotService {
   private onMemberLeft = (msg: Message) => {
     this.logger.debug(`onMemberLeft event`);
     if (!msg.from.is_bot)
-      new OnMemberLeftHandler(this.bot, msg, this.telegramConf, this.logger);
+      new OnMemberLeftHandler(
+        this.bot,
+        msg,
+        this.telegramConf,
+        this.playerRepository,
+        this.logger,
+      );
   };
 
   /**
@@ -142,6 +197,7 @@ export class NezlamniBotService {
         this.bot,
         query,
         this.telegramConf,
+        this.playerRepository,
         this.logger,
       );
     }
@@ -156,12 +212,12 @@ export class NezlamniBotService {
     this.logger.log(msg);
     if (!msg.from.is_bot && !msg.entities && msg.chat.type === 'private') {
       new OnSetNicknameDoneHandler(
-          this.bot,
-          msg,
-          this.telegramConf,
-          this.session,
-          this.playerRepository,
-          this.logger,
+        this.bot,
+        msg,
+        this.telegramConf,
+        this.session,
+        this.playerRepository,
+        this.logger,
       );
     }
   };
