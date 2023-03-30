@@ -26,7 +26,7 @@ export default registerAs(
      * Get api http port
      * @return {string}
      */
-    getHttpsPort: (): number => parseInt(getEnv('HTTP_PORT', false)) || 3000,
+    getHttpsPort: (): number => parseInt(getEnv('HTTP_PORT', false)) || 80,
 
     /**
      * Is local environment
