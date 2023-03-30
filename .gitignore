@@ -8,7 +8,6 @@
 .env.docker
 .env.develop
 .env.stage
-.env.preprod
 .env.production
 
 # Data

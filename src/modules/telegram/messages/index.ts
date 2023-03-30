@@ -1,5 +1,9 @@
 import { ON_COMMING_MESSAGE } from './comming';
-import { ERROR_GAP_MESSAGE, ERROR_SET_NICKNAME } from './errors.message';
+import {
+  ERROR_GAP_MESSAGE,
+  ERROR_SET_NICKNAME,
+  ERROR_GET_PLAYERS,
+} from './errors.message';
 import { INVITE_LINK_MESSAGE } from './invite-link.message';
 import { ON_MEMBER_LEFT } from './on-member-left.message';
 import { ON_NEW_MEMBER_1, ON_NEW_MEMBER_2 } from './on-new-member.message';
@@ -12,6 +16,7 @@ import { PLAYERS_LIST_MESSAGE } from './players-list.message';
 export {
   ON_START_MESSAGE,
   PLAYERS_LIST_MESSAGE,
+  ERROR_GET_PLAYERS,
   ERROR_SET_NICKNAME,
   ON_COMMING_MESSAGE,
   ON_NEW_MEMBER_1,

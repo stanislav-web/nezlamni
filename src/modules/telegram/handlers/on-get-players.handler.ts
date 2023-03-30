@@ -6,7 +6,7 @@ import { sortAscBy } from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { escapeString } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
-import { ERROR_GAP_MESSAGE, PLAYERS_LIST_MESSAGE } from '../messages';
+import { ERROR_GET_PLAYERS, PLAYERS_LIST_MESSAGE } from '../messages';
 import { PlayerRepository } from '../repositories/player.repository';
 import { Player } from '../schemas/player.schema';
 
@@ -58,7 +58,7 @@ export class OnGetPlayersHandler {
       })
       .catch((error) => {
         logger.error(error);
-        void bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        void bot.sendMessage(msg.chat.id, message(ERROR_GET_PLAYERS), {
           parse_mode: config.getMessageParseMode(),
         });
       });
