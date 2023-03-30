@@ -3,6 +3,7 @@ import {
   ERROR_GAP_MESSAGE,
   ERROR_SET_NICKNAME,
   ERROR_GET_PLAYERS,
+  ERROR_RESTRICT_ADD,
 } from './errors.message';
 import { INVITE_LINK_MESSAGE } from './invite-link.message';
 import { ON_MEMBER_LEFT } from './on-member-left.message';
@@ -15,6 +16,7 @@ import { PLAYERS_LIST_MESSAGE } from './players-list.message';
 
 export {
   ON_START_MESSAGE,
+  ERROR_RESTRICT_ADD,
   PLAYERS_LIST_MESSAGE,
   ERROR_GET_PLAYERS,
   ERROR_SET_NICKNAME,
