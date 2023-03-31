@@ -43,6 +43,12 @@ export default registerAs(
       getEnv('TELEGRAM_CHANNEL_GAMES_SCHEDULE_LINK', true),
 
     /**
+     * Get channel games champions link
+     * @return {string}
+     */
+    getChannelGamesChampionsLink: (): string =>
+      getEnv('TELEGRAM_CHANNEL_GAMES_CHAMPIONS_LINK', true),
+    /**
      * Get bot id
      * @return {number}
      */

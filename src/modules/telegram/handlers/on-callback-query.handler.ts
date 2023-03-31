@@ -6,6 +6,8 @@ import { message } from '../../../common/utils/placeholder.util';
 import { escapeString } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import {
+  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE,
+  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
   NICKNAME_COMMAND_PUBLIC,
@@ -68,6 +70,16 @@ export class OnCallbackQueryHandler {
           config,
         );
         break;
+
+      case CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.COMMAND ||
+        CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC.COMMAND:
+        promise = OnCallbackQueryHandler.getChannelGameChampionsQueryHandler(
+          bot,
+          query,
+          config,
+        );
+        break;
+
       default:
         break;
     }
@@ -154,6 +166,27 @@ export class OnCallbackQueryHandler {
     return bot.sendMessage(
       query.from.id,
       message(`${config.getChannelGamesScheduleLink()}`),
+      {
+        parse_mode: config.getMessageParseMode(),
+      },
+    );
+  }
+
+  /**
+   * Set channel games champions callback query handler
+   * @param {TelegramBot} bot
+   * @param {CallbackQuery} query
+   * @param {TelegramConfigType} config
+   * @return Promise<TelegramBot.Message | void>
+   */
+  private static getChannelGameChampionsQueryHandler(
+    bot: TelegramBot,
+    query: CallbackQuery,
+    config: TelegramConfigType,
+  ): Promise<TelegramBot.Message | void> {
+    return bot.sendMessage(
+      query.from.id,
+      message(`${config.getChannelGamesChampionsLink()}`),
       {
         parse_mode: config.getMessageParseMode(),
       },

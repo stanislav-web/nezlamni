@@ -12,6 +12,12 @@ export type TelegramConfigType = {
    */
   getBotName(): string;
   /**
+   * Get channel games champions link
+   * @return {string}
+   */
+  getChannelGamesChampionsLink(): string;
+
+  /**
    * Get channel games schedule link
    * @return {string}
    */

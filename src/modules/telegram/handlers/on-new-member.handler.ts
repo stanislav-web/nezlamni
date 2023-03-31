@@ -27,7 +27,6 @@ export class OnNewMemberHandler {
     let promise: Promise<TelegramBot.Chat | void | TelegramBot.Message>;
     if (msg.chat.id !== config.getNotificationChannel()) {
       promise = bot.getChat(config.getNotificationChannel()).then((res) => {
-        res.invite_link;
         void bot.sendMessage(
           msg.chat.id,
           message(ERROR_RESTRICT_ADD, {
@@ -44,7 +43,7 @@ export class OnNewMemberHandler {
         .sendMessage(
           msg.chat.id,
           message(ON_NEW_MEMBER_1, {
-            adminId: config.getGroupAdminId(),
+            username: msg.new_chat_members[0].first_name,
             adminName: config.getGroupAdminName(),
           }),
           {
@@ -52,9 +51,15 @@ export class OnNewMemberHandler {
           },
         )
         .then(() =>
-          bot.sendMessage(msg.chat.id, message(ON_NEW_MEMBER_2), {
-            parse_mode: config.getMessageParseMode(),
-          }),
+          bot.sendMessage(
+            msg.chat.id,
+            message(ON_NEW_MEMBER_2, {
+              botId: config.getBotId(),
+            }),
+            {
+              parse_mode: config.getMessageParseMode(),
+            },
+          ),
         );
     }
     promise.catch((error) => {

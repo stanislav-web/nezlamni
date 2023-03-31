@@ -39,3 +39,15 @@ export const CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE = {
   REGEXP: /\/schedule$/,
   BTN: '📅 Розклад ігор',
 };
+
+export const CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC = {
+  COMMAND: '/champions@NezlamniFifaBot',
+  REGEXP: /\/champions@NezlamniFifaBot$/,
+  BTN: '🏆 Наші чемпіони',
+};
+
+export const CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE = {
+  COMMAND: '/champions',
+  REGEXP: /\/champions$/,
+  BTN: '🏆 Наші чемпіони',
+};

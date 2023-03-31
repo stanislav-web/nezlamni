@@ -9,6 +9,8 @@ import { isEmpty } from '../../../common/utils/string.util';
 import { telegramConfig } from '../../../configs';
 import { MemoryDbStorageProvider } from '../../storage/providers/memory-db.provider';
 import {
+  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE,
+  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
   NICKNAME_COMMAND_PRIVATE,
@@ -19,6 +21,7 @@ import {
 } from '../commands';
 import {
   OnCallbackQueryHandler,
+  OnGetChannelGameChampionsHandler,
   OnGetPlayersHandler,
   OnMemberLeftHandler,
   OnNewMemberHandler,
@@ -82,6 +85,14 @@ export class NezlamniBotService {
       CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.REGEXP,
       this.onChannelGameSchedule,
     );
+    this.bot.onText(
+      CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC.REGEXP,
+      this.onChannelGameChampions,
+    );
+    this.bot.onText(
+      CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.REGEXP,
+      this.onChannelGameChampions,
+    );
     this.bot.on('new_chat_members', this.onNewMember);
     this.bot.on('chat_member_updated', this.onMemberUpdated);
     this.bot.on('left_chat_member', this.onMemberLeft);
@@ -89,6 +100,7 @@ export class NezlamniBotService {
     this.bot.on('chat_join_request', this.onChatJoinRequest);
     this.bot.on('message', this.onMessage);
     this.bot.on('callback_query', this.onCallbackQuery);
+    this.bot.on('inline_query', this.onInlineQuery);
     this.bot.on('polling_error', this.onPoolingError);
     this.bot.on('error', this.onFatalError);
   }
@@ -140,7 +152,7 @@ export class NezlamniBotService {
   };
 
   /**
-   * onPlayersList event /players
+   * onChannelGameSchedule event /schedule
    * @param {Message} msg
    */
   private onChannelGameSchedule = (msg: Message) => {
@@ -152,6 +164,26 @@ export class NezlamniBotService {
         msg.text === CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.COMMAND)
     )
       new OnGetChannelScheduleHandler(
+        this.bot,
+        msg,
+        this.telegramConf,
+        this.logger,
+      );
+  };
+
+  /**
+   * onChannelGameChampions event /champions
+   * @param {Message} msg
+   */
+  private onChannelGameChampions = (msg: Message) => {
+    this.logger.debug(`onChannelGameChampions event`);
+    this.logger.log(msg);
+    if (
+      !msg.from.is_bot &&
+      (msg.text === CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC.COMMAND ||
+        msg.text === CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.COMMAND)
+    )
+      new OnGetChannelGameChampionsHandler(
         this.bot,
         msg,
         this.telegramConf,
@@ -190,6 +222,24 @@ export class NezlamniBotService {
    * @param {CallbackQuery} query
    */
   private onCallbackQuery = (query: CallbackQuery) => {
+    this.logger.debug(`onCallbackQuery event`);
+    if (!query.from.is_bot && query.message.chat.type === 'private') {
+      this.session.put(query.message.chat.id, query.data);
+      new OnCallbackQueryHandler(
+        this.bot,
+        query,
+        this.telegramConf,
+        this.playerRepository,
+        this.logger,
+      );
+    }
+  };
+
+  /**
+   * onInlineQuery event
+   * @param {CallbackQuery} query
+   */
+  private onInlineQuery = (query: CallbackQuery) => {
     this.logger.debug(`onCallbackQuery event`);
     if (!query.from.is_bot && query.message.chat.type === 'private') {
       this.session.put(query.message.chat.id, query.data);

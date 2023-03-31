@@ -5,9 +5,9 @@ import { TelegramConfigType } from '../../../configs/types/telegram.config.type'
 import { ERROR_GAP_MESSAGE } from '../messages';
 
 @Injectable()
-export class OnGetChannelScheduleHandler {
+export class OnGetChannelGameChampionsHandler {
   /**
-   * OnGetChannelScheduleHandler event handler
+   * OnGetChannelGameChampionsHandler event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
    * @param {TelegramConfigType} config
@@ -22,7 +22,7 @@ export class OnGetChannelScheduleHandler {
     void bot
       .sendMessage(
         msg.chat.id,
-        message(`${config.getChannelGamesScheduleLink()}`),
+        message(`${config.getChannelGamesChampionsLink()}`),
         {
           parse_mode: config.getMessageParseMode(),
         },

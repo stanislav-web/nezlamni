@@ -1,4 +1,5 @@
 import { OnCallbackQueryHandler } from './on-callback-query.handler';
+import { OnGetChannelGameChampionsHandler } from './on-get-channel-game-champions.handler';
 import { OnGetPlayersHandler } from './on-get-players.handler';
 import { OnMemberLeftHandler } from './on-member-left.handler';
 import { OnNewMemberHandler } from './on-new-member.handler';
@@ -14,4 +15,5 @@ export {
   OnCallbackQueryHandler,
   OnSetNicknameDoneHandler,
   OnGetPlayersHandler,
+  OnGetChannelGameChampionsHandler,
 };
