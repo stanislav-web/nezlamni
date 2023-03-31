@@ -3,6 +3,7 @@ import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import {
+  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PUBLIC,
   PLAYERS_LIST_COMMAND_PRIVATE,
@@ -77,6 +78,13 @@ export class OnStartHandler {
                     text: CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.BTN,
                     callback_data:
                       CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND,
+                  },
+                ],
+                [
+                  {
+                    text: CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.BTN,
+                    callback_data:
+                      CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.COMMAND,
                   },
                 ],
               ],
