@@ -100,7 +100,7 @@ export class NezlamniBotService {
     this.bot.on('chat_join_request', this.onChatJoinRequest);
     this.bot.on('message', this.onMessage);
     this.bot.on('callback_query', this.onCallbackQuery);
-    this.bot.on('inline_query', this.onInlineQuery);
+    // this.bot.on('inline_query', this.onInlineQuery);
     this.bot.on('polling_error', this.onPoolingError);
     this.bot.on('error', this.onFatalError);
   }
