@@ -4,9 +4,8 @@ import { APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { ExceptionFilter } from './common/filters/exception.filter';
 import { RequestLoggerMiddleware } from './common/middlewares/request-logger.middleware';
-import {apiConfig, mongoDbStorageConfig} from './configs';
+import { apiConfig } from './configs';
 import { TelegramModule } from './modules/telegram/telegram.module';
-import {MongooseModule} from "@nestjs/mongoose";
 
 @Module({
   imports: [
