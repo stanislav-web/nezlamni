@@ -146,7 +146,7 @@ export const countries: CountryListItemType[] = [
     flag: '🇫🇰',
   },
   { name: 'Faroe Islands', dial_code: '+298', code: 'FO', flag: '🇫🇴' },
-  { name: 'England', dial_code: '+298', code: 'EN', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { name: 'England', dial_code: '+999', code: 'EN', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
   { name: 'Fiji', dial_code: '+679', code: 'FJ', flag: '🇫🇯' },
   { name: 'Finland', dial_code: '+358', code: 'FI', flag: '🇫🇮' },
   { name: 'France', dial_code: '+33', code: 'FR', flag: '🇫🇷' },
