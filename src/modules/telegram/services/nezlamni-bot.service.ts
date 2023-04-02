@@ -1,30 +1,28 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import TelegramBot, {
-  CallbackQuery,
-  ChatJoinRequest,
-  Message,
-} from 'node-telegram-bot-api';
+import TelegramBot, { CallbackQuery, Message } from 'node-telegram-bot-api';
 import { isEmpty } from '../../../common/utils/string.util';
 import { telegramConfig } from '../../../configs';
 import { MemoryDbStorageProvider } from '../../storage/providers/memory-db.provider';
 import {
-  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE,
-  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
+  NATION_COMMAND_PRIVATE,
+  NATION_COMMAND_PUBLIC,
   NICKNAME_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PUBLIC,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
   START_COMMAND,
 } from '../commands';
+import { TelegramChatTypesEnum } from '../enums/telegram-chat-types.enum';
 import {
   OnCallbackQueryHandler,
-  OnGetChannelGameChampionsHandler,
   OnGetPlayersHandler,
   OnMemberLeftHandler,
   OnNewMemberHandler,
+  OnSetNationDoneHandler,
+  OnSetNationHandler,
   OnSetNicknameDoneHandler,
   OnSetNicknameHandler,
   OnStartHandler,
@@ -38,262 +36,343 @@ export class NezlamniBotService {
    * Event logger
    * @private
    */
-  private readonly logger: Logger = new Logger(NezlamniBotService.name);
+  private static readonly logger: Logger = new Logger(NezlamniBotService.name);
 
   /**
    * Telegram bot
    * @private
    */
-  private readonly bot: TelegramBot;
+  private static bot: TelegramBot;
+
+  /**
+   * Telegram config from application
+   * @private
+   */
+  private static config: ConfigType<typeof telegramConfig>;
+
+  /**
+   * Database repository for players
+   * @private
+   */
+  private static playerRepository: PlayerRepository;
+
+  /**
+   * Session storage
+   * @private
+   */
+  private static session: MemoryDbStorageProvider;
 
   /**
    * Constructor
-   * @param {ConfigType<typeof telegramConfig>} telegramConf
    * @param {MemoryDbStorageProvider} session
+   * @param {ConfigType<typeof telegramConfig>} telegramConf
    * @param {PlayerRepository} playerRepository
    */
   constructor(
-    @Inject(telegramConfig.KEY)
-    private readonly telegramConf: ConfigType<typeof telegramConfig>,
     @Inject(MemoryDbStorageProvider)
     private readonly session: MemoryDbStorageProvider,
+    @Inject(telegramConfig.KEY)
+    private telegramConf: ConfigType<typeof telegramConfig>,
     private readonly playerRepository: PlayerRepository,
   ) {
-    this.bot = new TelegramBot(this.telegramConf.getToken(), {
-      polling: this.telegramConf.isPooling()
-        ? {
-            autoStart: this.telegramConf.isPoolingAutoStart(),
-            interval: this.telegramConf.getPoolingInterval(),
-            params: {
-              timeout: this.telegramConf.getPoolingTimeout(),
-            },
-          }
-        : undefined,
-    });
+    NezlamniBotService.config = telegramConf;
+    NezlamniBotService.session = session;
+    NezlamniBotService.playerRepository = playerRepository;
+    NezlamniBotService.bot = new TelegramBot(
+      NezlamniBotService.config.getToken(),
+      {
+        polling: NezlamniBotService.config.isPooling()
+          ? {
+              autoStart: NezlamniBotService.config.isPoolingAutoStart(),
+              interval: NezlamniBotService.config.getPoolingInterval(),
+              params: {
+                timeout: NezlamniBotService.config.getPoolingTimeout(),
+              },
+            }
+          : undefined,
+      },
+    );
 
-    this.logger.debug(`${this.telegramConf.getBotName()} has been initialized`);
-    this.bot.onText(START_COMMAND.REGEXP, this.onStart);
-    this.bot.onText(NICKNAME_COMMAND_PUBLIC.REGEXP, this.onSetNickname);
-    this.bot.onText(NICKNAME_COMMAND_PRIVATE.REGEXP, this.onSetNickname);
-    this.bot.onText(PLAYERS_LIST_COMMAND_PUBLIC.REGEXP, this.onPlayersList);
-    this.bot.onText(PLAYERS_LIST_COMMAND_PRIVATE.REGEXP, this.onPlayersList);
-    this.bot.onText(
+    NezlamniBotService.logger.debug(
+      `${NezlamniBotService.config.getBotName()} has been initialized`,
+    );
+    void this.initCommandsHandlers();
+  }
+
+  /**
+   * Init chat bot commands handlers
+   */
+  async initCommandsHandlers(): Promise<void> {
+    NezlamniBotService.bot.onText(START_COMMAND.REGEXP, this.onStart);
+    NezlamniBotService.bot.onText(
+      NICKNAME_COMMAND_PUBLIC.REGEXP,
+      this.onSetNickname,
+    );
+    NezlamniBotService.bot.onText(
+      NICKNAME_COMMAND_PRIVATE.REGEXP,
+      this.onSetNickname,
+    );
+    NezlamniBotService.bot.onText(
+      NATION_COMMAND_PUBLIC.REGEXP,
+      this.onSetNation,
+    );
+    NezlamniBotService.bot.onText(
+      NATION_COMMAND_PRIVATE.REGEXP,
+      this.onSetNation,
+    );
+    NezlamniBotService.bot.onText(
+      PLAYERS_LIST_COMMAND_PUBLIC.REGEXP,
+      this.onPlayersList,
+    );
+    NezlamniBotService.bot.onText(
+      PLAYERS_LIST_COMMAND_PRIVATE.REGEXP,
+      this.onPlayersList,
+    );
+    NezlamniBotService.bot.onText(
       CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.REGEXP,
       this.onChannelGameSchedule,
     );
-    this.bot.onText(
+    NezlamniBotService.bot.onText(
       CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.REGEXP,
       this.onChannelGameSchedule,
     );
-    this.bot.onText(
-      CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC.REGEXP,
-      this.onChannelGameChampions,
-    );
-    this.bot.onText(
-      CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.REGEXP,
-      this.onChannelGameChampions,
-    );
-    this.bot.on('new_chat_members', this.onNewMember);
-    this.bot.on('chat_member_updated', this.onMemberUpdated);
-    this.bot.on('left_chat_member', this.onMemberLeft);
-    this.bot.on('chat_invite_link', this.onChatInviteLink);
-    this.bot.on('chat_join_request', this.onChatJoinRequest);
-    this.bot.on('message', this.onMessage);
-    this.bot.on('callback_query', this.onCallbackQuery);
-    // this.bot.on('inline_query', this.onInlineQuery);
-    this.bot.on('polling_error', this.onPoolingError);
-    this.bot.on('error', this.onFatalError);
+    NezlamniBotService.bot.on('new_chat_members', this.onNewMember);
+    NezlamniBotService.bot.on('left_chat_member', this.onMemberLeft);
+    NezlamniBotService.bot.on('message', this.onMessage);
+    NezlamniBotService.bot.on('callback_query', this.onCallbackQuery);
+    NezlamniBotService.bot.on('polling_error', this.onPoolingError);
+    NezlamniBotService.bot.on('error', this.onFatalError);
   }
 
   /**
    * OnStart event /start
    * @param {Message} msg
    */
-  private onStart = (msg: Message) => {
-    this.logger.debug(`onStart event`);
-    if (!isEmpty(msg.text) && !msg.from.is_bot)
-      new OnStartHandler(this.bot, msg, this.telegramConf, this.logger);
-  };
-
-  /**
-   * OnSetNickname event /nickname
-   * @param {Message} msg
-   */
-  private onSetNickname = (msg: Message) => {
-    this.logger.debug(`onSetNickname event`);
-    this.logger.log(msg.text);
-    if (
-      !msg.from.is_bot &&
-      (msg.text === NICKNAME_COMMAND_PUBLIC.COMMAND ||
-        msg.text === NICKNAME_COMMAND_PRIVATE.COMMAND)
-    )
-      new OnSetNicknameHandler(this.bot, msg, this.telegramConf, this.logger);
-  };
-
-  /**
-   * onPlayersList event /players
-   * @param {Message} msg
-   */
-  private onPlayersList = (msg: Message) => {
-    this.logger.debug(`onPlayersList event`);
-    this.logger.log(msg);
-    if (
-      !msg.from.is_bot &&
-      (msg.text === PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
-        msg.text === PLAYERS_LIST_COMMAND_PUBLIC.COMMAND)
-    )
-      new OnGetPlayersHandler(
-        this.bot,
+  async onStart(msg: Message): Promise<void> {
+    if (!isEmpty(msg.text) && !msg.from.is_bot) {
+      NezlamniBotService.logger.debug(`onStart event`);
+      NezlamniBotService.logger.log(msg);
+      await OnStartHandler.init(
+        NezlamniBotService.bot,
         msg,
-        this.telegramConf,
-        this.playerRepository,
-        this.logger,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
       );
-  };
-
-  /**
-   * onChannelGameSchedule event /schedule
-   * @param {Message} msg
-   */
-  private onChannelGameSchedule = (msg: Message) => {
-    this.logger.debug(`onChannelGameSchedule event`);
-    this.logger.log(msg);
-    if (
-      !msg.from.is_bot &&
-      (msg.text === CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND ||
-        msg.text === CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.COMMAND)
-    )
-      new OnGetChannelScheduleHandler(
-        this.bot,
-        msg,
-        this.telegramConf,
-        this.logger,
-      );
-  };
-
-  /**
-   * onChannelGameChampions event /champions
-   * @param {Message} msg
-   */
-  private onChannelGameChampions = (msg: Message) => {
-    this.logger.debug(`onChannelGameChampions event`);
-    this.logger.log(msg);
-    if (
-      !msg.from.is_bot &&
-      (msg.text === CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC.COMMAND ||
-        msg.text === CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.COMMAND)
-    )
-      new OnGetChannelGameChampionsHandler(
-        this.bot,
-        msg,
-        this.telegramConf,
-        this.logger,
-      );
-  };
+    }
+  }
 
   /**
    * onNewMember event
    * @param {Message} msg
    */
-  private onNewMember = (msg: Message) => {
-    this.logger.debug(`onNewMember event`);
-    if (!msg.from.is_bot)
-      new OnNewMemberHandler(this.bot, msg, this.telegramConf, this.logger);
-  };
+  async onNewMember(msg: Message): Promise<void> {
+    NezlamniBotService.logger.debug(`onNewMember event`);
+    if (!msg.from.is_bot) {
+      NezlamniBotService.logger.debug(`onNewMember event`);
+      NezlamniBotService.logger.log(msg);
+      await OnNewMemberHandler.init(
+        NezlamniBotService.bot,
+        msg,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
+      );
+    }
+  }
 
   /**
    * onMemberLeft event
    * @param {Message} msg
    */
-  private onMemberLeft = (msg: Message) => {
-    this.logger.debug(`onMemberLeft event`);
-    if (!msg.from.is_bot)
-      new OnMemberLeftHandler(
-        this.bot,
+  async onMemberLeft(msg: Message): Promise<void> {
+    if (!msg.from.is_bot) {
+      NezlamniBotService.logger.debug(`onMemberLeft event`);
+      NezlamniBotService.logger.log(msg);
+      await OnMemberLeftHandler.init(
+        NezlamniBotService.bot,
         msg,
-        this.telegramConf,
-        this.playerRepository,
-        this.logger,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
       );
-  };
+    }
+  }
+
+  /**
+   * onChannelGameSchedule event /schedule
+   * @param {Message} msg
+   */
+  async onChannelGameSchedule(msg: Message): Promise<void> {
+    if (
+      !msg.from.is_bot &&
+      (msg.text === CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND ||
+        msg.text === CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.COMMAND)
+    ) {
+      NezlamniBotService.logger.debug(`onChannelGameSchedule event`);
+      NezlamniBotService.logger.log(msg);
+      await OnGetChannelScheduleHandler.init(
+        NezlamniBotService.bot,
+        msg,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
+      );
+    }
+  }
+
+  /**
+   * OnSetNickname event /nickname
+   * @param {Message} msg
+   */
+  async onSetNickname(msg: Message): Promise<void> {
+    if (
+      !msg.from.is_bot &&
+      (msg.text === NICKNAME_COMMAND_PUBLIC.COMMAND ||
+        msg.text === NICKNAME_COMMAND_PRIVATE.COMMAND)
+    ) {
+      NezlamniBotService.logger.debug(`onSetNickname event`);
+      NezlamniBotService.logger.log(msg);
+      NezlamniBotService.session.put(
+        `${NICKNAME_COMMAND_PRIVATE.SESSION}${msg.from.id}`,
+        msg.text,
+      );
+      await OnSetNicknameHandler.init(
+        NezlamniBotService.bot,
+        msg,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
+      );
+    }
+  }
+
+  /**
+   * onSetNation event /nation
+   * @param {Message} msg
+   */
+  async onSetNation(msg: Message): Promise<void> {
+    if (
+      !msg.from.is_bot &&
+      (msg.text === NATION_COMMAND_PUBLIC.COMMAND ||
+        msg.text === NATION_COMMAND_PRIVATE.COMMAND)
+    ) {
+      NezlamniBotService.logger.debug(`onSetNation event`);
+      NezlamniBotService.logger.log(msg);
+      NezlamniBotService.session.put(
+        `${NATION_COMMAND_PRIVATE.SESSION}${msg.from.id}`,
+        msg.text,
+      );
+      await OnSetNationHandler.init(
+        NezlamniBotService.bot,
+        msg,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
+      );
+    }
+  }
+
+  /**
+   * onPlayersList event /players
+   * @param {Message} msg
+   */
+  async onPlayersList(msg: Message): Promise<void> {
+    if (
+      !msg.from.is_bot &&
+      (msg.text === PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
+        msg.text === PLAYERS_LIST_COMMAND_PUBLIC.COMMAND)
+    ) {
+      NezlamniBotService.logger.debug(`onPlayersList event`);
+      NezlamniBotService.logger.log(msg);
+      await OnGetPlayersHandler.init(
+        NezlamniBotService.bot,
+        msg,
+        NezlamniBotService.config,
+        NezlamniBotService.playerRepository,
+        NezlamniBotService.logger,
+      );
+    }
+  }
 
   /**
    * onCallbackQuery event
    * @param {CallbackQuery} query
    */
-  private onCallbackQuery = (query: CallbackQuery) => {
-    this.logger.debug(`onCallbackQuery event`);
-    if (!query.from.is_bot && query.message.chat.type === 'private') {
-      this.session.put(query.message.chat.id, query.data);
-      new OnCallbackQueryHandler(
-        this.bot,
-        query,
-        this.telegramConf,
-        this.playerRepository,
-        this.logger,
-      );
-    }
-  };
+  async onCallbackQuery(query: CallbackQuery): Promise<void> {
+    if (
+      !query.from.is_bot &&
+      query.message.chat.type === TelegramChatTypesEnum.PRIVATE
+    ) {
+      NezlamniBotService.logger.debug(`onCallbackQuery event`);
 
-  /**
-   * onInlineQuery event
-   * @param {CallbackQuery} query
-   */
-  private onInlineQuery = (query: CallbackQuery) => {
-    this.logger.debug(`onCallbackQuery event`);
-    if (!query.from.is_bot && query.message.chat.type === 'private') {
-      this.session.put(query.message.chat.id, query.data);
-      new OnCallbackQueryHandler(
-        this.bot,
+      if (query.data === NICKNAME_COMMAND_PRIVATE.COMMAND)
+        NezlamniBotService.session.put(
+          `${NICKNAME_COMMAND_PRIVATE.SESSION}${query.from.id}`,
+          query.data,
+        );
+
+      if (query.data === NATION_COMMAND_PRIVATE.COMMAND)
+        NezlamniBotService.session.put(
+          `${NATION_COMMAND_PRIVATE.SESSION}${query.from.id}`,
+          query.data,
+        );
+
+      await OnCallbackQueryHandler.init(
+        NezlamniBotService.bot,
         query,
-        this.telegramConf,
-        this.playerRepository,
-        this.logger,
+        NezlamniBotService.config,
+        NezlamniBotService.playerRepository,
+        NezlamniBotService.logger,
       );
     }
-  };
+  }
 
   /**
    * onMessage event
    * @param {Message} msg
    */
-  private onMessage = (msg: Message) => {
-    this.logger.debug(`onMessage event`);
-    this.logger.log(msg);
-    if (!msg.from.is_bot && !msg.entities && msg.chat.type === 'private') {
-      new OnSetNicknameDoneHandler(
-        this.bot,
-        msg,
-        this.telegramConf,
-        this.session,
-        this.playerRepository,
-        this.logger,
-      );
+  async onMessage(msg: Message): Promise<void> {
+    if (
+      !msg.from.is_bot &&
+      !msg.entities &&
+      msg.chat.type === TelegramChatTypesEnum.PRIVATE
+    ) {
+      NezlamniBotService.logger.debug(`onMessage event`);
+      NezlamniBotService.logger.log(msg);
+      const sessionNicknameKey = `${NICKNAME_COMMAND_PRIVATE.SESSION}${msg.from.id}`;
+      const sessionNationKey = `${NATION_COMMAND_PRIVATE.SESSION}${msg.from.id}`;
+      if (NezlamniBotService.session.has(sessionNicknameKey)) {
+        await OnSetNicknameDoneHandler.init(
+          NezlamniBotService.bot,
+          msg,
+          NezlamniBotService.config,
+          NezlamniBotService.playerRepository,
+          NezlamniBotService.logger,
+        );
+        NezlamniBotService.session.remove(sessionNicknameKey);
+      } else if (NezlamniBotService.session.has(sessionNationKey)) {
+        await OnSetNationDoneHandler.init(
+          NezlamniBotService.bot,
+          msg,
+          NezlamniBotService.config,
+          NezlamniBotService.playerRepository,
+          NezlamniBotService.logger,
+        );
+        NezlamniBotService.session.remove(sessionNationKey);
+      }
     }
-  };
+  }
 
-  private onMemberUpdated = (msg: Message) => {
-    this.logger.debug(`onMemberUpdated event`);
-    this.logger.debug(msg);
-  };
+  /**
+   * onPoolingError event
+   * @param {Error} error
+   */
+  onPoolingError(error: Error): void {
+    NezlamniBotService.logger.debug(`onPoolingError event`);
+    NezlamniBotService.logger.error(error);
+  }
 
-  private onChatInviteLink = (msg: Message) => {
-    this.logger.debug(`onChatInviteLink event`);
-    this.logger.debug(msg);
-  };
-
-  private onChatJoinRequest = (msg: ChatJoinRequest) => {
-    this.logger.debug(`onChatJoinRequest event`);
-    this.logger.debug(msg);
-  };
-
-  private onPoolingError = (error: Error) => {
-    this.logger.debug(`onPoolingError event`);
-    this.logger.error(error);
-  };
-
-  private onFatalError = (error: Error) => {
-    this.logger.debug(`onFatalError event`);
-    this.logger.error(error);
-  };
+  /**
+   * onFatalError event
+   * @param {Error} error
+   */
+  onFatalError(error: Error): void {
+    NezlamniBotService.logger.debug(`onFatalError event`);
+    NezlamniBotService.logger.error(error);
+  }
 }

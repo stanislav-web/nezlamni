@@ -21,32 +21,41 @@ export class PlayerRepository {
 
   /**
    * Get players list
-   * @return Promise<Player[]>
+   * @return Promise<Player[] | null>
    */
-  async findAll(): Promise<Player[]> {
-    return await this.playerModel.find().exec();
+  async findAll(): Promise<Player[] | null> {
+    return this.playerModel.find();
+  }
+
+  /**
+   * Get player
+   * @param {Partial<Player>} filter
+   * @return Promise<Player | null>
+   */
+  async findOne(filter: Partial<Player>): Promise<Player | null> {
+    return this.playerModel.findOne(filter);
   }
 
   /**
    * Get players list
    * @param {Partial<Player>} filter
    * @param {Partial<Player>} data
-   * @return Promise<Player>
+   * @return Promise<Player | null>
    */
   async findOneAndUpdate(
     filter: Partial<Player>,
     data: Partial<Player>,
-  ): Promise<Player> {
-    return await this.playerModel.findOneAndUpdate(filter, data).exec();
+  ): Promise<Player | null> {
+    return this.playerModel.findOneAndUpdate(filter, data);
   }
 
   /**
    * Update player by Id
    * @param {string} id
    * @param {Player} player
-   * @return Promise<Player>
+   * @return Promise<Player | null>
    */
-  async update(id: string, player: Player): Promise<Player> {
+  async update(id: string, player: Player): Promise<Player | null> {
     return this.playerModel.findByIdAndUpdate(id, player, { new: true });
   }
 

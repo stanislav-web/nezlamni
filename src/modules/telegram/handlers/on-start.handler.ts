@@ -1,20 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import {
-  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
-  NICKNAME_COMMAND_PUBLIC,
+  CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
+  NATION_COMMAND_PRIVATE,
+  NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
+  PLAYERS_LIST_COMMAND_PUBLIC,
 } from '../commands';
+import { TelegramChatTypesEnum } from '../enums/telegram-chat-types.enum';
 import {
   ERROR_GAP_MESSAGE,
-  ON_START_MESSAGE,
-  ON_START_STANDALONE_MESSAGE,
+  ERROR_RESTRICT_ADD,
+  ON_START_PRIVATE_MESSAGE,
+  ON_START_PUBLIC_MESSAGE,
 } from '../messages';
 
-@Injectable()
 export class OnStartHandler {
   /**
    * OnStart event handler
@@ -23,38 +26,23 @@ export class OnStartHandler {
    * @param {TelegramConfigType} config
    * @param {Logger} logger
    */
-  constructor(
+  static async init(
     bot: TelegramBot,
     msg: Message,
     config: TelegramConfigType,
     logger: Logger,
-  ) {
-    let notification;
-    const chain: Promise<TelegramBot.Chat> = bot.getChat(
-      config.getNotificationChannel(),
-    );
-
-    if (msg.chat.type !== 'private') {
-      notification = () => ({
-        text: ON_START_MESSAGE,
-        data: {
-          username: msg.from.first_name,
-        },
-      });
-    } else {
-      notification = (channel) => ({
-        text: ON_START_STANDALONE_MESSAGE,
-        data: {
-          channel: channel.invite_link,
-          username: msg.from.first_name,
-        },
-      });
-    }
-    chain
-      .then((channel) => {
-        void bot.sendMessage(
+  ): Promise<void> {
+    try {
+      const chat: TelegramBot.Chat = await bot.getChat(
+        config.getNotificationChannel(),
+      );
+      if (msg.chat.type === TelegramChatTypesEnum.PRIVATE) {
+        await bot.sendMessage(
           msg.chat.id,
-          message(notification(channel).text, notification(channel).data),
+          message(ON_START_PRIVATE_MESSAGE, {
+            channel: chat.invite_link,
+            username: msg.from.first_name,
+          }),
           {
             parse_mode: config.getMessageParseMode(),
             reply_markup: {
@@ -63,8 +51,14 @@ export class OnStartHandler {
               inline_keyboard: [
                 [
                   {
-                    text: NICKNAME_COMMAND_PUBLIC.BTN,
-                    callback_data: NICKNAME_COMMAND_PUBLIC.COMMAND,
+                    text: NICKNAME_COMMAND_PRIVATE.BTN,
+                    callback_data: NICKNAME_COMMAND_PRIVATE.COMMAND,
+                  },
+                ],
+                [
+                  {
+                    text: NATION_COMMAND_PRIVATE.BTN,
+                    callback_data: NATION_COMMAND_PRIVATE.COMMAND,
                   },
                 ],
                 [
@@ -80,23 +74,52 @@ export class OnStartHandler {
                       CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND,
                   },
                 ],
-                [
-                  {
-                    text: CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.BTN,
-                    callback_data:
-                      CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.COMMAND,
-                  },
-                ],
               ],
             },
           },
         );
-      })
-      .catch((error) => {
-        logger.error(error);
-        void bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
-          parse_mode: config.getMessageParseMode(),
-        });
+      } else {
+        if (msg.chat.id !== chat.id) {
+          await bot.sendMessage(
+            msg.chat.id,
+            message(ERROR_RESTRICT_ADD, {
+              channelName: chat.title,
+              channelLink: chat.invite_link,
+            }),
+            {
+              parse_mode: config.getMessageParseMode(),
+            },
+          );
+        } else {
+          await bot.sendMessage(msg.chat.id, message(ON_START_PUBLIC_MESSAGE), {
+            parse_mode: config.getMessageParseMode(),
+            reply_markup: {
+              resize_keyboard: true,
+              force_reply: true,
+              inline_keyboard: [
+                [
+                  {
+                    text: PLAYERS_LIST_COMMAND_PUBLIC.BTN,
+                    callback_data: PLAYERS_LIST_COMMAND_PRIVATE.COMMAND,
+                  },
+                ],
+                [
+                  {
+                    text: CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.BTN,
+                    callback_data:
+                      CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND,
+                  },
+                ],
+              ],
+            },
+          });
+        }
+      }
+    } catch (error) {
+      logger.error(error);
+      await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        parse_mode: config.getMessageParseMode(),
       });
+    }
   }
 }

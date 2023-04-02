@@ -1,8 +1,9 @@
 import { OnCallbackQueryHandler } from './on-callback-query.handler';
-import { OnGetChannelGameChampionsHandler } from './on-get-channel-game-champions.handler';
 import { OnGetPlayersHandler } from './on-get-players.handler';
 import { OnMemberLeftHandler } from './on-member-left.handler';
 import { OnNewMemberHandler } from './on-new-member.handler';
+import { OnSetNationDoneHandler } from './on-set-nation-done.handler';
+import { OnSetNationHandler } from './on-set-nation.handler';
 import { OnSetNicknameDoneHandler } from './on-set-nickname-done.handler';
 import { OnSetNicknameHandler } from './on-set-nickname.handler';
 import { OnStartHandler } from './on-start.handler';
@@ -12,8 +13,9 @@ export {
   OnNewMemberHandler,
   OnMemberLeftHandler,
   OnSetNicknameHandler,
-  OnCallbackQueryHandler,
   OnSetNicknameDoneHandler,
+  OnSetNationHandler,
+  OnSetNationDoneHandler,
+  OnCallbackQueryHandler,
   OnGetPlayersHandler,
-  OnGetChannelGameChampionsHandler,
 };
