@@ -35,7 +35,12 @@ export class OnSetNationHandler {
           },
         );
       } else {
-        await bot.sendMessage(msg.chat.id, message(ON_SET_NATION_MESSAGE));
+        await bot.sendMessage(
+          msg.chat.id,
+          message(ON_SET_NATION_MESSAGE, {
+            parse_mode: config.getMessageParseMode(),
+          }),
+        );
       }
     } catch (error) {
       logger.error(error);
