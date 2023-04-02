@@ -1,29 +1,42 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import TelegramBot, { CallbackQuery } from 'node-telegram-bot-api';
 import { getBorderCharacters, table } from 'table';
-import { sortAscBy } from '../../../common/utils/array.util';
+import {
+  findInArrayInsensitive,
+  sortAscBy,
+} from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
-import { escapeString } from '../../../common/utils/string.util';
+import { escapeString, isEmpty } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import {
-  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE,
-  CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC,
+  countries,
+  CountryListItemType,
+} from '../../../data/country-list.data';
+import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
-  NICKNAME_COMMAND_PUBLIC,
+  NATION_COMMAND_PRIVATE,
+  NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
 } from '../commands';
 import {
   ERROR_GAP_MESSAGE,
+  ERROR_GET_PLAYERS,
+  ON_SET_NATION_MESSAGE,
   ON_SET_NICKNAME_MESSAGE,
   PLAYERS_LIST_MESSAGE,
 } from '../messages';
 import { PlayerRepository } from '../repositories/player.repository';
 import { Player } from '../schemas/player.schema';
 
-@Injectable()
 export class OnCallbackQueryHandler {
+  /**
+   * @param {PlayerRepository} playerRepository
+   * @private
+   */
+  private static playerRepository: PlayerRepository;
+
   /**
    * OnCallbackQuery event handler
    * @param {TelegramBot} bot
@@ -32,63 +45,55 @@ export class OnCallbackQueryHandler {
    * @param {PlayerRepository} playerRepository
    * @param {Logger} logger
    */
-  constructor(
+  static async init(
     bot: TelegramBot,
     query: CallbackQuery,
     config: TelegramConfigType,
     playerRepository: PlayerRepository,
     logger: Logger,
-  ) {
-    if (query.from.id !== query.message.chat.id) {
-      return void bot.sendMessage(query.from.id, message(ERROR_GAP_MESSAGE), {
-        parse_mode: config.getMessageParseMode(),
-      });
-    }
-    let promise;
-    switch (query.data) {
-      case NICKNAME_COMMAND_PUBLIC.COMMAND:
-        promise = OnCallbackQueryHandler.setNicknameQueryHandler(
-          bot,
-          query,
-          config,
-        );
-        break;
-      case PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
-        PLAYERS_LIST_COMMAND_PUBLIC.COMMAND:
-        promise = OnCallbackQueryHandler.getPlayersListQueryHandler(
-          bot,
-          query,
-          config,
-          playerRepository,
-        );
-        break;
-      case CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND ||
-        CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.COMMAND:
-        promise = OnCallbackQueryHandler.getChannelGamesScheduleQueryHandler(
-          bot,
-          query,
-          config,
-        );
-        break;
-
-      case CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PRIVATE.COMMAND ||
-        CHANNEL_GAMES_CHAMPIONS_LINK_COMMAND_PUBLIC.COMMAND:
-        promise = OnCallbackQueryHandler.getChannelGameChampionsQueryHandler(
-          bot,
-          query,
-          config,
-        );
-        break;
-
-      default:
-        break;
-    }
-    promise.catch((error) => {
+  ): Promise<void> {
+    try {
+      OnCallbackQueryHandler.playerRepository = playerRepository;
+      switch (query.data) {
+        case NICKNAME_COMMAND_PRIVATE.COMMAND:
+          await OnCallbackQueryHandler.setNicknameQueryHandler(
+            bot,
+            query,
+            config,
+          );
+          break;
+        case NATION_COMMAND_PRIVATE.COMMAND:
+          await OnCallbackQueryHandler.setNationQueryHandler(
+            bot,
+            query,
+            config,
+          );
+          break;
+        case PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
+          PLAYERS_LIST_COMMAND_PUBLIC.COMMAND:
+          await OnCallbackQueryHandler.getPlayersListQueryHandler(
+            bot,
+            query,
+            config,
+          );
+          break;
+        case CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND ||
+          CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC.COMMAND:
+          await OnCallbackQueryHandler.getChannelGamesScheduleQueryHandler(
+            bot,
+            query,
+            config,
+          );
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
       logger.error(error);
-      void bot.sendMessage(query.from.id, message(ERROR_GAP_MESSAGE), {
+      await bot.sendMessage(query.from.id, message(ERROR_GAP_MESSAGE), {
         parse_mode: config.getMessageParseMode(),
       });
-    });
+    }
   }
 
   /**
@@ -109,30 +114,57 @@ export class OnCallbackQueryHandler {
   }
 
   /**
+   * Set nation callback query handler
+   * @param {TelegramBot} bot
+   * @param {CallbackQuery} query
+   * @param  {TelegramConfigType} config,
+   * @return Promise<TelegramBot.Message | void>
+   */
+  private static setNationQueryHandler(
+    bot: TelegramBot,
+    query: CallbackQuery,
+    config: TelegramConfigType,
+  ): Promise<TelegramBot.Message | void> {
+    return bot.sendMessage(query.from.id, message(ON_SET_NATION_MESSAGE), {
+      parse_mode: config.getMessageParseMode(),
+    });
+  }
+
+  /**
    * Get players list callback query handler
    * @param {TelegramBot} bot
    * @param {CallbackQuery} query
    * @param {TelegramConfigType} config
-   * @param {PlayerRepository} playerRepository
    * @return Promise<TelegramBot.Message | void>
    */
-  private static getPlayersListQueryHandler(
+  private static async getPlayersListQueryHandler(
     bot: TelegramBot,
     query: CallbackQuery,
     config: TelegramConfigType,
-    playerRepository: PlayerRepository,
   ): Promise<TelegramBot.Message | void> {
-    return playerRepository.findAll().then((players: Player[]) => {
-      const pls: Player[] = sortAscBy(players, 'telegramFirstName');
+    const players: Player[] =
+      await OnCallbackQueryHandler.playerRepository.findAll();
+    if (!players)
+      await bot.sendMessage(query.from.id, message(ERROR_GET_PLAYERS), {
+        parse_mode: config.getMessageParseMode(),
+      });
+    else {
+      const pls = sortAscBy(players, 'telegramFirstName');
       const content = [];
-      pls.map((player, i) => {
+      pls.map((player: Player, i) => {
+        const country = findInArrayInsensitive(
+          countries,
+          'code',
+          player.playerNation || '',
+        ) as CountryListItemType;
+        const nation = !isEmpty(country) ? ` ${country.flag}` : ('' as string);
         content.push([
           `${++i}.`,
           ` [${player.telegramFirstName}](tg://user?id=${player.telegramUserId})`,
-          ` (${escapeString(player.playerNickname)})`,
+          ` (${escapeString(player.playerNickname)}${nation})`,
         ]);
       });
-      void bot.sendMessage(
+      await bot.sendMessage(
         query.from.id,
         message(PLAYERS_LIST_MESSAGE, {
           players: table(content, {
@@ -148,45 +180,24 @@ export class OnCallbackQueryHandler {
           parse_mode: config.getMessageParseMode(),
         },
       );
-    });
+    }
   }
 
   /**
-   * Set channel games schedule callback query handler
+   * Get channel games schedule callback query handler
    * @param {TelegramBot} bot
    * @param {CallbackQuery} query
    * @param {TelegramConfigType} config
    * @return Promise<TelegramBot.Message | void>
    */
-  private static getChannelGamesScheduleQueryHandler(
+  private static async getChannelGamesScheduleQueryHandler(
     bot: TelegramBot,
     query: CallbackQuery,
     config: TelegramConfigType,
   ): Promise<TelegramBot.Message | void> {
-    return bot.sendMessage(
+    await bot.sendMessage(
       query.from.id,
       message(`${config.getChannelGamesScheduleLink()}`),
-      {
-        parse_mode: config.getMessageParseMode(),
-      },
-    );
-  }
-
-  /**
-   * Set channel games champions callback query handler
-   * @param {TelegramBot} bot
-   * @param {CallbackQuery} query
-   * @param {TelegramConfigType} config
-   * @return Promise<TelegramBot.Message | void>
-   */
-  private static getChannelGameChampionsQueryHandler(
-    bot: TelegramBot,
-    query: CallbackQuery,
-    config: TelegramConfigType,
-  ): Promise<TelegramBot.Message | void> {
-    return bot.sendMessage(
-      query.from.id,
-      message(`${config.getChannelGamesChampionsLink()}`),
       {
         parse_mode: config.getMessageParseMode(),
       },

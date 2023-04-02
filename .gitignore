@@ -39,7 +39,7 @@ logs
 test.*
 
 # Misc
-data
+
 documentation
 tsconfig.tsbuildinfo
 tsconfig.build.tsbuildinfo

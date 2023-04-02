@@ -65,6 +65,15 @@ export class MemoryDbStorageProvider {
   }
 
   /**
+   * Has item
+   * @param {string} key
+   * @returns {boolean}
+   */
+  has(key) {
+    return Object.prototype.hasOwnProperty.call(this.pool[this.namespace], key);
+  }
+
+  /**
    * List items
    * @returns {*}
    */

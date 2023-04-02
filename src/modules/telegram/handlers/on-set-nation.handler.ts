@@ -1,18 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import { TelegramChatTypesEnum } from '../enums/telegram-chat-types.enum';
 import {
   ERROR_GAP_MESSAGE,
-  ERROR_SET_NICKNAME,
-  ON_SET_NICKNAME_MESSAGE,
+  ERROR_SET_NATION_RESTRICT,
+  ON_SET_NATION_MESSAGE,
 } from '../messages';
 
-@Injectable()
-export class OnSetNicknameHandler {
+export class OnSetNationHandler {
   /**
-   * OnSetNickname event handler
+   * OnSetNation event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
    * @param {TelegramConfigType} config
@@ -28,7 +27,7 @@ export class OnSetNicknameHandler {
       if (msg.chat.type !== TelegramChatTypesEnum.PRIVATE) {
         await bot.sendMessage(
           msg.chat.id,
-          message(ERROR_SET_NICKNAME, {
+          message(ERROR_SET_NATION_RESTRICT, {
             botId: config.getBotId(),
           }),
           {
@@ -36,9 +35,7 @@ export class OnSetNicknameHandler {
           },
         );
       } else {
-        await bot.sendMessage(msg.chat.id, message(ON_SET_NICKNAME_MESSAGE), {
-          parse_mode: config.getMessageParseMode(),
-        });
+        await bot.sendMessage(msg.chat.id, message(ON_SET_NATION_MESSAGE));
       }
     } catch (error) {
       logger.error(error);

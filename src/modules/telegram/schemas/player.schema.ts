@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 export type PlayerDocument = HydratedDocument<Player>;
 
@@ -24,6 +24,8 @@ export class Player {
   telegramChannelId: number;
   @Prop({ required: false })
   playerNickname?: string;
+  @Prop({ required: false })
+  playerNation?: string;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);
