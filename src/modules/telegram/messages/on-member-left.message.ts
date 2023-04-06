@@ -1,1 +1,1 @@
-export const ON_MEMBER_LEFT = `Прощавай, *%username%*  🟥. Роздягальня там 👉`;
+export const ON_MEMBER_LEFT = `Гравець *%username%* покинув лігу 🟥`;

@@ -1,4 +1,4 @@
-import { Inject, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
@@ -10,8 +10,7 @@ export class OnMemberLeftHandler {
    * @param {PlayerRepository} playerRepository
    * @private
    */
-  @Inject(PlayerRepository)
-  private static readonly playerRepository: PlayerRepository;
+  private static playerRepository: PlayerRepository;
 
   /**
    * OnMemberLeft event handler

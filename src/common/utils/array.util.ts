@@ -32,3 +32,12 @@ export const findInArrayInsensitive = (
       ? obj[property]?.toLowerCase() === value.toLowerCase()
       : undefined,
   );
+
+/**
+ * Add properties to each object in array
+ * @param {object[]} array
+ * @param {object} props
+ */
+export const addProps = (array: object[], props: object) => {
+  return array.map((obj) => ({ ...obj, ...props }));
+};

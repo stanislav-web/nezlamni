@@ -4,6 +4,7 @@ import documentationConfig from './documentation.config';
 import memoryDbStorageConfig from './memorydb-storage.config';
 import mongoDbStorageConfig from './mongodb-storage.config';
 import telegramConfig from './telegram.config';
+import tournamentConfig from './tournament.config';
 
 export {
   apiConfig,
@@ -12,4 +13,5 @@ export {
   telegramConfig,
   memoryDbStorageConfig,
   mongoDbStorageConfig,
+  tournamentConfig,
 };

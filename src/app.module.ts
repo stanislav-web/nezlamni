@@ -6,6 +6,7 @@ import { ExceptionFilter } from './common/filters/exception.filter';
 import { RequestLoggerMiddleware } from './common/middlewares/request-logger.middleware';
 import { apiConfig } from './configs';
 import { TelegramModule } from './modules/telegram/telegram.module';
+import { TournamentModule } from './modules/tournament/tournament.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { TelegramModule } from './modules/telegram/telegram.module';
       load: [apiConfig],
       cache: apiConfig().isProduction() === true,
     }),
+    TournamentModule,
     TelegramModule,
   ],
   controllers: [AppController],

@@ -6,6 +6,8 @@ import { join } from 'path';
 import { Public } from './common/decorators/public.decorator';
 import { ServerDto } from './common/dtos/server.dto';
 import { apiConfig } from './configs';
+import { TournamentTypeEnum } from './modules/telegram/enums/tournament-type.enum';
+import { TournamentBotService } from './modules/telegram/services/tournament-bot.service';
 
 @ApiTags('Service API')
 @Controller()
@@ -13,8 +15,9 @@ export class AppController {
   constructor(
     @Inject(apiConfig.KEY)
     private config: ConfigType<typeof apiConfig>,
+    private readonly tournamentBotService: TournamentBotService,
   ) {}
-  @Get('/')
+  @Get('/a')
   @Public()
   @ApiOperation({ summary: 'Health' })
   @ApiResponse({
@@ -22,7 +25,15 @@ export class AppController {
     type: ServerDto,
     description: 'Get application info',
   })
-  getHealth(): object {
+  async getHealth(): Promise<object> {
+    await this.tournamentBotService.createTournament(
+      'League Champions',
+      TournamentTypeEnum.CHAMPIONSHIP,
+      4,
+      true,
+      new Date(),
+      new Date(),
+    );
     return {
       application: this.config.getName(),
       version: this.config.getVersion(),

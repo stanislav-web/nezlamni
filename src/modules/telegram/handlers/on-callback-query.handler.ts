@@ -157,7 +157,9 @@ export class OnCallbackQueryHandler {
           'code',
           player.playerNation || '',
         ) as CountryListItemType;
-        const nation = !isEmpty(country) ? ` ${country.flag}` : ('' as string);
+        const nation = !isEmpty(country)
+          ? ` ${country?.flag}`
+          : player?.playerNation || ('' as string);
         content.push([
           `${++i}.`,
           ` [${player.telegramFirstName}](tg://user?id=${player.telegramUserId})`,

@@ -78,25 +78,26 @@ export class NezlamniBotService {
     NezlamniBotService.config = telegramConf;
     NezlamniBotService.session = session;
     NezlamniBotService.playerRepository = playerRepository;
-    NezlamniBotService.bot = new TelegramBot(
-      NezlamniBotService.config.getToken(),
-      {
-        polling: NezlamniBotService.config.isPooling()
-          ? {
-              autoStart: NezlamniBotService.config.isPoolingAutoStart(),
-              interval: NezlamniBotService.config.getPoolingInterval(),
-              params: {
-                timeout: NezlamniBotService.config.getPoolingTimeout(),
-              },
-            }
-          : undefined,
-      },
-    );
-
-    NezlamniBotService.logger.debug(
-      `${NezlamniBotService.config.getBotName()} has been initialized`,
-    );
-    void this.initCommandsHandlers();
+    //@TODO Uncomment to launch bot
+    // NezlamniBotService.bot = new TelegramBot(
+    //   NezlamniBotService.config.getToken(),
+    //   {
+    //     polling: NezlamniBotService.config.isPooling()
+    //       ? {
+    //           autoStart: NezlamniBotService.config.isPoolingAutoStart(),
+    //           interval: NezlamniBotService.config.getPoolingInterval(),
+    //           params: {
+    //             timeout: NezlamniBotService.config.getPoolingTimeout(),
+    //           },
+    //         }
+    //       : undefined,
+    //   },
+    // );
+    //
+    // NezlamniBotService.logger.debug(
+    //   `${NezlamniBotService.config.getBotName()} has been initialized`,
+    // );
+    //void this.initCommandsHandlers();
   }
 
   /**
