@@ -15,6 +15,7 @@ import {
 import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
+  GOAL_COMMAND_PRIVATE,
   NATION_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
@@ -23,6 +24,7 @@ import {
 import {
   ERROR_GAP_MESSAGE,
   ERROR_GET_PLAYERS,
+  ON_SET_GOAL_MESSAGE,
   ON_SET_NATION_MESSAGE,
   ON_SET_NICKNAME_MESSAGE,
   PLAYERS_LIST_MESSAGE,
@@ -68,6 +70,9 @@ export class OnCallbackQueryHandler {
             query,
             config,
           );
+          break;
+        case GOAL_COMMAND_PRIVATE.COMMAND:
+          await OnCallbackQueryHandler.setGoalQueryHandler(bot, query, config);
           break;
         case PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
           PLAYERS_LIST_COMMAND_PUBLIC.COMMAND:
@@ -131,6 +136,29 @@ export class OnCallbackQueryHandler {
   }
 
   /**
+   * Set goal callback query handler
+   * @param {TelegramBot} bot
+   * @param {CallbackQuery} query
+   * @param  {TelegramConfigType} config,
+   * @return Promise<TelegramBot.Message | void>
+   */
+  private static setGoalQueryHandler(
+    bot: TelegramBot,
+    query: CallbackQuery,
+    config: TelegramConfigType,
+  ): Promise<TelegramBot.Message | void> {
+    return bot.sendMessage(
+      query.from.id,
+      message(ON_SET_GOAL_MESSAGE, {
+        exampleLink: `${config.getStaticContentUrl()}/examples/goal.png`,
+      }),
+      {
+        parse_mode: config.getMessageParseMode(),
+      },
+    );
+  }
+
+  /**
    * Get players list callback query handler
    * @param {TelegramBot} bot
    * @param {CallbackQuery} query
@@ -159,7 +187,7 @@ export class OnCallbackQueryHandler {
         ) as CountryListItemType;
         const nation = !isEmpty(country)
           ? ` ${country?.flag}`
-          : player?.playerNation || ('' as string);
+          : ` ${player?.playerNation}` || ('' as string);
         content.push([
           `${++i}.`,
           ` [${player.telegramFirstName}](tg://user?id=${player.telegramUserId})`,

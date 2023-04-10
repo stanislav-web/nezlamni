@@ -129,4 +129,12 @@ export class MemoryDbStorageProvider {
     delete this.pool[this.namespace][key];
     return true;
   }
+
+  /**
+   * Destroy items
+   * @returns {void}
+   */
+  destroy(): void {
+    this.pool[this.namespace] = {};
+  }
 }

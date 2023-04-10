@@ -1,4 +1,5 @@
 import { ParseMode } from 'node-telegram-bot-api';
+import { getEnv } from '../../common/utils/get-env.variable.util';
 
 export type TelegramConfigType = {
   /**
@@ -65,10 +66,22 @@ export type TelegramConfigType = {
   getPoolingTimeout(): number;
 
   /**
+   * Get static content url
+   * @return {string}
+   */
+  getStaticContentUrl(): string;
+
+  /**
    * Get Telegram token
    * @return {string}
    */
   getToken(): string;
+
+  /**
+   * Get upload files path content url
+   * @return {string}
+   */
+  getUploadFilesPath(): string;
 
   /**
    * Get web hook domain

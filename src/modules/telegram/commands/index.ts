@@ -50,3 +50,15 @@ export const CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE = {
   REGEXP: /\/schedule$/,
   BTN: '📅 Розклад ігор',
 };
+export const GOAL_COMMAND_PRIVATE = {
+  SESSION: 'goal',
+  COMMAND: '/goal',
+  REGEXP: /\/goal$/,
+  BTN: '⚽️ Відправити гол',
+};
+export const GOAL_COMMAND_PUBLIC = {
+  SESSION: 'goal',
+  COMMAND: '/goal@NezlamniFifaBot',
+  REGEXP: /\/goal@NezlamniFifaBot$/,
+  BTN: '⚽️ Відправити гол',
+};

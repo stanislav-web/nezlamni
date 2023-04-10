@@ -1,22 +1,30 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PlayerContentRepository } from './repositories/player-content.repository';
 import { PlayerRepository } from './repositories/player.repository';
-import { TournamentRepository } from './repositories/tournament.repository';
+import {
+  PlayerContent,
+  PlayerContentSchema,
+} from './schemas/player-content.schema';
 import { Player, PlayerSchema } from './schemas/player.schema';
-import { Tournament, TournamentSchema } from './schemas/tournament.schema';
 import { NezlamniBotService } from './services/nezlamni-bot.service';
-import { TournamentBotService } from './services/tournament-bot.service';
-import { apiConfig, mongoDbStorageConfig, telegramConfig } from '../../configs';
+import { WorldCupTournamentService } from './services/world-cup-tournament.service';
+import {
+  apiConfig,
+  mongoDbStorageConfig,
+  telegramConfig,
+  tournamentConfig,
+} from '../../configs';
 import { StorageModule } from '../storage/storage.module';
 import { TournamentModule } from '../tournament/tournament.module';
 
 @Module({
   providers: [
     PlayerRepository,
-    TournamentRepository,
+    PlayerContentRepository,
     NezlamniBotService,
-    TournamentBotService,
+    WorldCupTournamentService,
   ],
   imports: [
     StorageModule,
@@ -36,13 +44,17 @@ import { TournamentModule } from '../tournament/tournament.module';
     }),
     MongooseModule.forFeature([
       { name: Player.name, schema: PlayerSchema },
-      { name: Tournament.name, schema: TournamentSchema },
+      { name: PlayerContent.name, schema: PlayerContentSchema },
     ]),
     ConfigModule.forRoot({
       load: [telegramConfig],
       cache: apiConfig().isProduction() === true,
     }),
+    ConfigModule.forRoot({
+      load: [tournamentConfig],
+      cache: apiConfig().isProduction() === true,
+    }),
   ],
-  exports: [NezlamniBotService, TournamentBotService],
+  exports: [NezlamniBotService, WorldCupTournamentService],
 })
 export class TelegramModule {}

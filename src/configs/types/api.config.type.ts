@@ -5,6 +5,12 @@ export type ApiConfigType = {
    */
   getEnvironment(): string;
   /**
+   * Get api http host
+   * @return {string}
+   */
+  getHttpsHost(): string;
+
+  /**
    * Get api http port
    * @return {string}
    */

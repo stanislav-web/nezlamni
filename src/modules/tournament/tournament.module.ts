@@ -1,22 +1,25 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  OnModuleInit,
-} from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { GroupStageService } from './services/group-stage.service';
-import { RequestLoggerMiddleware } from '../../common/middlewares/request-logger.middleware';
-import { apiConfig, tournamentConfig } from '../../configs';
+import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
+import { MatchService } from './services/match.service';
+import { PlayerService } from './services/player.service';
+import { TournamentService } from './services/tournament.service';
+import { tournamentConfig } from '../../configs';
 
 @Module({
-  providers: [GroupStageService],
+  providers: [TournamentService, MatchService, PlayerService],
   imports: [
-    ConfigModule.forRoot({
-      load: [tournamentConfig],
-      cache: apiConfig().isProduction() === true,
+    HttpModule.register({
+      baseURL: tournamentConfig().getApiEndpoint(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      params: {
+        api_key: tournamentConfig().getApiKey(),
+      },
+      timeout: tournamentConfig().getApiResponseTimeout(),
+      responseType: tournamentConfig().getApiResponseType(),
     }),
   ],
-  exports: [GroupStageService],
+  exports: [TournamentService, MatchService, PlayerService],
 })
 export class TournamentModule {}

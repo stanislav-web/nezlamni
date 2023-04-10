@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
 
 @Injectable()
@@ -22,10 +22,11 @@ export class PlayerRepository {
 
   /**
    * Get players list
+   * @param {any} filter
    * @return Promise<Player[] | null>
    */
-  async findAll(): Promise<Player[] | null> {
-    return this.playerModel.find().exec();
+  async findAll(filter?: any): Promise<Player[] | null> {
+    return this.playerModel.find(filter).exec();
   }
 
   /**

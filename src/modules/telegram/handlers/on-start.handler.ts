@@ -5,12 +5,13 @@ import { TelegramConfigType } from '../../../configs/types/telegram.config.type'
 import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
+  GOAL_COMMAND_PRIVATE,
   NATION_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
 } from '../commands';
-import { TelegramChatTypesEnum } from '../enums/telegram-chat-types.enum';
+import { TelegramChatTypeEnum } from '../enums/telegram-chat-type.enum';
 import {
   ERROR_GAP_MESSAGE,
   ERROR_RESTRICT_ADD,
@@ -36,7 +37,7 @@ export class OnStartHandler {
       const chat: TelegramBot.Chat = await bot.getChat(
         config.getNotificationChannel(),
       );
-      if (msg.chat.type === TelegramChatTypesEnum.PRIVATE) {
+      if (msg.chat.type === TelegramChatTypeEnum.PRIVATE) {
         await bot.sendMessage(
           msg.chat.id,
           message(ON_START_PRIVATE_MESSAGE, {
@@ -59,6 +60,12 @@ export class OnStartHandler {
                   {
                     text: NATION_COMMAND_PRIVATE.BTN,
                     callback_data: NATION_COMMAND_PRIVATE.COMMAND,
+                  },
+                ],
+                [
+                  {
+                    text: GOAL_COMMAND_PRIVATE.BTN,
+                    callback_data: GOAL_COMMAND_PRIVATE.COMMAND,
                   },
                 ],
                 [

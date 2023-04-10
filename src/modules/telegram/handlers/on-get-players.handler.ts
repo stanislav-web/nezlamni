@@ -62,7 +62,7 @@ export class OnGetPlayersHandler {
           ) as CountryListItemType;
           const nation = !isEmpty(country)
             ? ` ${country?.flag}`
-            : player?.playerNation || ('' as string);
+            : ` ${player?.playerNation}` || ('' as string);
           content.push([
             `${++i}.`,
             ` [${player.telegramFirstName.trim()}](tg://user?id=${

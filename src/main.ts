@@ -1,12 +1,10 @@
-import { ValidationPipe } from '@nestjs/common';
+import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import apiConfig from './configs/api.config';
 import corsConfig from './configs/cors.config';
-import documentationConfig from './configs/documentation.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -24,17 +22,13 @@ async function bootstrap() {
   });
 
   app.use(helmet());
-  app.useGlobalPipes(new ValidationPipe());
-  if (false === apiConfig().isProduction()) {
-    const document = SwaggerModule.createDocument(
-      app,
-      documentationConfig().getOpenApiDocument(),
-      {
-        deepScanRoutes: true,
-      },
-    );
-    SwaggerModule.setup('api', app, document);
-  }
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+    }),
+  );
 
   await app.listen(apiConfig().getHttpsPort());
 }

@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
-import { TelegramChatTypesEnum } from '../enums/telegram-chat-types.enum';
+import { TelegramChatTypeEnum } from '../enums/telegram-chat-type.enum';
 import {
   ERROR_GAP_MESSAGE,
   ERROR_SET_NATION_RESTRICT,
@@ -24,7 +24,7 @@ export class OnSetNationHandler {
     logger: Logger,
   ): Promise<void> {
     try {
-      if (msg.chat.type !== TelegramChatTypesEnum.PRIVATE) {
+      if (msg.chat.type !== TelegramChatTypeEnum.PRIVATE) {
         await bot.sendMessage(
           msg.chat.id,
           message(ERROR_SET_NATION_RESTRICT, {
@@ -35,12 +35,9 @@ export class OnSetNationHandler {
           },
         );
       } else {
-        await bot.sendMessage(
-          msg.chat.id,
-          message(ON_SET_NATION_MESSAGE, {
-            parse_mode: config.getMessageParseMode(),
-          }),
-        );
+        await bot.sendMessage(msg.chat.id, message(ON_SET_NATION_MESSAGE), {
+          parse_mode: config.getMessageParseMode(),
+        });
       }
     } catch (error) {
       logger.error(error);

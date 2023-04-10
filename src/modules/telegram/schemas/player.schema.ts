@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Transform } from 'class-transformer';
-import { HydratedDocument, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type PlayerDocument = HydratedDocument<Player>;
+export type PlayerDocument = Player & Document;
 
 @Schema({
   collection: 'players',
@@ -18,20 +18,21 @@ export class Player {
   @Transform(({ value }) => value.toString())
   _id?: Types.ObjectId;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ type: Number, required: true, unique: true })
   telegramUserId: number;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   telegramFirstName: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   telegramUsername: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   telegramChannelId: number;
 
   @Prop({
     required: false,
+    type: String,
     set: (playerNickname: string) => {
       return playerNickname.trim();
     },
@@ -40,6 +41,7 @@ export class Player {
 
   @Prop({
     required: false,
+    type: String,
     set: (playerNation: string) => {
       return playerNation.trim();
     },

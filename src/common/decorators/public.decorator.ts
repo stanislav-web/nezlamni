@@ -1,7 +1,7 @@
 import { SetMetadata } from '@nestjs/common';
 
 /**
- * Provide public access to endpoint
+ * Provide static access to endpoint
  * @constructor
  */
 export const Public = () => SetMetadata('isPublic', true);

@@ -62,7 +62,7 @@ export default registerAs(
       parseInt(getEnv('TELEGRAM_MAX_ALLOWED_CONNECTIONS', true)),
 
     /**
-     * Get telegram bot name
+     * Get examples bot name
      * @return string
      */
     getBotName: (): string => getEnv('TELEGRAM_BOT_NAME', true),
@@ -105,5 +105,19 @@ export default registerAs(
      * @return {string}
      */
     getGroupAdminName: (): string => getEnv('TELEGRAM_GROUP_ADMIN_NAME', true),
+
+    /**
+     * Get static content url
+     * @return {string}
+     */
+    getStaticContentUrl: (): string =>
+      getEnv('TELEGRAM_STATIC_CONTENT_URL', true),
+
+    /**
+     * Get upload files path content url
+     * @return {string}
+     */
+    getUploadFilesPath: (): string =>
+      getEnv('TELEGRAM_UPLOAD_FILES_PATH', true),
   }),
 );

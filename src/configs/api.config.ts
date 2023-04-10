@@ -24,9 +24,15 @@ export default registerAs(
     getEnvironment: (): string => getEnv('NODE_ENV', true),
     /**
      * Get api http port
+     * @return {number}
+     */
+    getHttpsPort: (): number => parseInt(getEnv('PORT', false)) || 3033,
+
+    /**
+     * Get api http port
      * @return {string}
      */
-    getHttpsPort: (): number => parseInt(getEnv('HTTP_PORT', false)) || 80,
+    getHttpsHost: (): string => getEnv('HTTP_HOST', false),
 
     /**
      * Is local environment
