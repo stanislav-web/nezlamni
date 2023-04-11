@@ -3,7 +3,7 @@ import TelegramBot, { CallbackQuery } from 'node-telegram-bot-api';
 import { getBorderCharacters, table } from 'table';
 import {
   findInArrayInsensitive,
-  sortAscStringBy,
+  sortAscBy,
 } from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { escapeString, isEmpty } from '../../../common/utils/string.util';
@@ -150,7 +150,8 @@ export class OnCallbackQueryHandler {
     return bot.sendMessage(
       query.from.id,
       message(ON_SET_GOAL_MESSAGE, {
-        exampleLink: `${config.getStaticContentUrl()}/examples/goal.png`,
+        exampleLink1: `${config.getStaticContentUrl()}/examples/goal1.png`,
+        exampleLink2: `${config.getStaticContentUrl()}/examples/goal2.png`,
       }),
       {
         parse_mode: config.getMessageParseMode(),
@@ -177,19 +178,18 @@ export class OnCallbackQueryHandler {
         parse_mode: config.getMessageParseMode(),
       });
     else {
-      const pls = sortAscStringBy(players, 'telegramFirstName');
+      const pls = sortAscBy(players, 'telegramFirstName');
       const content = [];
       pls.map((player: Player, i) => {
         let nation = '';
         if ('playerNation' in player) {
+          const pNation = player.playerNation || '';
           const country = findInArrayInsensitive(
             countries,
             'code',
-            player.playerNation || '',
+            pNation,
           ) as CountryListItemType;
-          nation = !isEmpty(country)
-            ? ` ${country?.flag}`
-            : ` ${player?.playerNation}` || ('' as string);
+          nation = !isEmpty(country) ? ` ${country?.flag}` : ` ${pNation}`;
         }
         content.push([
           `${++i}.`,

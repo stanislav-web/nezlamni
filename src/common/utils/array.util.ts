@@ -1,23 +1,4 @@
 /**
- * Ascending sort fo array objects (Strings)
- * @param {any[]} objects
- * @param {string} property
- * @return object[]
- */
-export const sortAscStringBy = (objects: any[], property: string): object[] =>
-  objects.sort((a, b) => {
-    const prop1 = a[property].toUpperCase();
-    const prop2 = b[property].toUpperCase();
-    let comparison = 0;
-    if (prop1 > prop2) {
-      comparison = 1;
-    } else if (prop1 < prop2) {
-      comparison = -1;
-    }
-    return comparison;
-  });
-
-/**
  * Ascending sort fo array objects
  * @param {any[]} objects
  * @param {string} property
