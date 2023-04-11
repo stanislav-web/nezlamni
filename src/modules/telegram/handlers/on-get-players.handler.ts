@@ -4,7 +4,7 @@ import { getBorderCharacters, table } from 'table';
 
 import {
   findInArrayInsensitive,
-  sortAscStringBy,
+  sortAscBy,
 } from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { escapeString, isEmpty } from '../../../common/utils/string.util';
@@ -52,7 +52,7 @@ export class OnGetPlayersHandler {
           parse_mode: config.getMessageParseMode(),
         });
       else {
-        const pls = sortAscStringBy(players, 'telegramFirstName');
+        const pls = sortAscBy(players, 'telegramFirstName');
         const content = [];
         pls.map((player: Player, i) => {
           let nation = '';
