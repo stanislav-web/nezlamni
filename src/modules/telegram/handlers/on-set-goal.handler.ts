@@ -38,8 +38,7 @@ export class OnSetGoalHandler {
         await bot.sendMessage(
           msg.chat.id,
           message(ON_SET_GOAL_MESSAGE, {
-            exampleLink1: `${config.getStaticContentUrl()}/examples/goal1.png`,
-            exampleLink2: `${config.getStaticContentUrl()}/examples/goal2.png`,
+            exampleLink: `${config.getStaticContentUrl()}/examples/goal.png`,
           }),
           {
             parse_mode: config.getMessageParseMode(),
