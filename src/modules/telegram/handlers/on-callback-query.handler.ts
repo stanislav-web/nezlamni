@@ -3,7 +3,7 @@ import TelegramBot, { CallbackQuery } from 'node-telegram-bot-api';
 import { getBorderCharacters, table } from 'table';
 import {
   findInArrayInsensitive,
-  sortAscBy,
+  sortAscStringBy,
 } from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { escapeString, isEmpty } from '../../../common/utils/string.util';
@@ -177,17 +177,20 @@ export class OnCallbackQueryHandler {
         parse_mode: config.getMessageParseMode(),
       });
     else {
-      const pls = sortAscBy(players, 'telegramFirstName');
+      const pls = sortAscStringBy(players, 'telegramFirstName');
       const content = [];
       pls.map((player: Player, i) => {
-        const country = findInArrayInsensitive(
-          countries,
-          'code',
-          player.playerNation || '',
-        ) as CountryListItemType;
-        const nation = !isEmpty(country)
-          ? ` ${country?.flag}`
-          : ` ${player?.playerNation}` || ('' as string);
+        let nation = '';
+        if ('playerNation' in player) {
+          const country = findInArrayInsensitive(
+            countries,
+            'code',
+            player.playerNation,
+          ) as CountryListItemType;
+          nation = !isEmpty(country)
+            ? ` ${country?.flag}`
+            : ` ${player?.playerNation}` || ('' as string);
+        }
         content.push([
           `${++i}.`,
           ` [${player.telegramFirstName}](tg://user?id=${player.telegramUserId})`,
