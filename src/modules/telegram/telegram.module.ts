@@ -12,6 +12,7 @@ import { NezlamniBotService } from './services/nezlamni-bot.service';
 import { WorldCupTournamentService } from './services/world-cup-tournament.service';
 import {
   apiConfig,
+  gameplayConfig,
   mongoDbStorageConfig,
   telegramConfig,
   tournamentConfig,
@@ -52,6 +53,10 @@ import { TournamentModule } from '../tournament/tournament.module';
     }),
     ConfigModule.forRoot({
       load: [tournamentConfig],
+      cache: apiConfig().isProduction() === true,
+    }),
+    ConfigModule.forRoot({
+      load: [gameplayConfig],
       cache: apiConfig().isProduction() === true,
     }),
   ],

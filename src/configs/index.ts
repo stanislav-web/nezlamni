@@ -1,5 +1,6 @@
 import apiConfig from './api.config';
 import corsConfig from './cors.config';
+import gameplayConfig from './gameplay.config';
 import memoryDbStorageConfig from './memorydb-storage.config';
 import mongoDbStorageConfig from './mongodb-storage.config';
 import telegramConfig from './telegram.config';
@@ -12,4 +13,5 @@ export {
   memoryDbStorageConfig,
   mongoDbStorageConfig,
   tournamentConfig,
+  gameplayConfig,
 };

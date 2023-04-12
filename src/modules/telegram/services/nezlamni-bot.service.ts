@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import TelegramBot, { CallbackQuery, Message } from 'node-telegram-bot-api';
 import { isEmpty } from '../../../common/utils/string.util';
-import { telegramConfig } from '../../../configs';
+import { gameplayConfig, telegramConfig } from '../../../configs';
 import { MemoryDbStorageProvider } from '../../storage/providers/memory-db.provider';
 import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
@@ -56,6 +56,12 @@ export class NezlamniBotService {
   private static config: ConfigType<typeof telegramConfig>;
 
   /**
+   * Gameplay config from application
+   * @private
+   */
+  private static gameplayConf: ConfigType<typeof gameplayConfig>;
+
+  /**
    * Database repository for players
    * @private
    */
@@ -77,6 +83,7 @@ export class NezlamniBotService {
    * Constructor
    * @param {MemoryDbStorageProvider} session
    * @param {ConfigType<typeof telegramConfig>} telegramConf
+   * @param {ConfigType<typeof gameplayConfig>} gameplayConf
    * @param {PlayerRepository} playerRepository
    * @param {PlayerContentRepository} playerContentRepository
    */
@@ -85,10 +92,13 @@ export class NezlamniBotService {
     private readonly session: MemoryDbStorageProvider,
     @Inject(telegramConfig.KEY)
     private telegramConf: ConfigType<typeof telegramConfig>,
+    @Inject(gameplayConfig.KEY)
+    private gameplayConf: ConfigType<typeof gameplayConfig>,
     private readonly playerRepository: PlayerRepository,
     private readonly playerContentRepository: PlayerContentRepository,
   ) {
     NezlamniBotService.config = telegramConf;
+    NezlamniBotService.gameplayConf = gameplayConf;
     NezlamniBotService.session = session;
     NezlamniBotService.playerRepository = playerRepository;
     NezlamniBotService.playerContentRepository = playerContentRepository;
@@ -307,6 +317,7 @@ export class NezlamniBotService {
         NezlamniBotService.bot,
         msg,
         NezlamniBotService.config,
+        NezlamniBotService.gameplayConf,
         NezlamniBotService.logger,
       );
     }

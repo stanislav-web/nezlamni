@@ -23,6 +23,10 @@ export class PlayerContent {
   player: Player;
   @Prop({ type: String, enum: PlayerContentTypeEnum, required: true })
   type: PlayerContentTypeEnum;
+  @Prop({ type: Boolean, default: false, required: false })
+  isPolled = false;
+  @Prop({ type: Boolean, default: false, required: false })
+  isWinner = false;
   @Prop({ type: String, required: true })
   caption: string;
   @Prop({ type: String, required: true })

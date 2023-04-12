@@ -16,11 +16,11 @@ export class PlayerContentRepository {
 
   /**
    * Add content
-   * @param {PlayerContent} content
+   * @param {Partial<PlayerContent>} content
    * @return Promise<Player>
    */
   async add(
-    content: PlayerContent,
+    content: Partial<PlayerContent>,
   ): Promise<PlayerContent & { _id: Types.ObjectId }> {
     const created = new this.playerContentModel(content);
     return await created.save();

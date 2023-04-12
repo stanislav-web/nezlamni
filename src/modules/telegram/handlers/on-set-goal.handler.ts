@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
+import { GameplayConfigType } from '../../../configs/types/gameplay.config.type';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import { TelegramChatTypeEnum } from '../enums/telegram-chat-type.enum';
 import {
@@ -15,12 +16,14 @@ export class OnSetGoalHandler {
    * @param {TelegramBot} bot
    * @param {Message} msg
    * @param {TelegramConfigType} config
+   * @param {GameplayConfigType} gameplayConf
    * @param {Logger} logger
    */
   static async init(
     bot: TelegramBot,
     msg: Message,
     config: TelegramConfigType,
+    gameplayConf: GameplayConfigType,
     logger: Logger,
   ): Promise<void> {
     try {
@@ -39,6 +42,7 @@ export class OnSetGoalHandler {
           msg.chat.id,
           message(ON_SET_GOAL_MESSAGE, {
             exampleLink: `${config.getStaticContentUrl()}/examples/goal.png`,
+            limit: gameplayConf.getGameplayGoalsUploadLimit(),
           }),
           {
             parse_mode: config.getMessageParseMode(),
