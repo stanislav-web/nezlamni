@@ -6,6 +6,7 @@ import { TelegramConfigType } from '../../../configs/types/telegram.config.type'
 import {
   ERROR_EMPTY,
   ERROR_GAP_MESSAGE,
+  ERROR_UNREGISTERED,
   ON_SET_NICKNAME_DONE_MESSAGE,
 } from '../messages';
 import { PlayerRepository } from '../repositories/player.repository';
@@ -31,8 +32,27 @@ export class OnSetNicknameDoneHandler {
     config: TelegramConfigType,
     playerRepository: PlayerRepository,
     logger: Logger,
-  ): Promise<void> {
+  ): Promise<TelegramBot.Message | void> {
     try {
+      const member = await bot.getChatMember(
+        config.getNotificationChannel(),
+        msg.from.id,
+      );
+      if (!member) {
+        const chat: TelegramBot.Chat = await bot.getChat(
+          config.getNotificationChannel(),
+        );
+        return await bot.sendMessage(
+          msg.chat.id,
+          message(ERROR_UNREGISTERED, {
+            channelName: chat.title,
+            channelLink: chat.invite_link,
+          }),
+          {
+            parse_mode: config.getMessageParseMode(),
+          },
+        );
+      }
       OnSetNicknameDoneHandler.playerRepository = playerRepository;
       if (!('text' in msg)) {
         await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {

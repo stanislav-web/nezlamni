@@ -11,10 +11,12 @@ import {
   ERROR_EMPTY,
   ERROR_SET_GOAL_RESTRICT,
   ERROR_SET_GOAL_CAPTION_FORMAT,
+  ERROR_UNREGISTERED,
 } from './errors.message';
 import { INVITE_LINK_MESSAGE } from './invite-link.message';
 import { ON_MEMBER_LEFT } from './on-member-left.message';
 import { ON_NEW_MEMBER } from './on-new-member.message';
+import { ON_POLL } from './on-poll.message';
 import { ON_SET_GOAL_DONE_MESSAGE } from './on-set-goal-done.message';
 import { ON_SET_GOAL_MESSAGE } from './on-set-goal.message';
 import { ON_SET_NATION_DONE_MESSAGE } from './on-set-nation-done.message';
@@ -50,4 +52,5 @@ export {
   ERROR_GAP_MESSAGE,
   ON_START_PRIVATE_MESSAGE,
   ERROR_EMPTY,
+  ERROR_UNREGISTERED,
 };

@@ -7,26 +7,22 @@ import { PlayerRepository } from '../repositories/player.repository';
 
 export class OnMemberLeftHandler {
   /**
-   * @param {PlayerRepository} playerRepository
-   * @private
-   */
-  private static playerRepository: PlayerRepository;
-
-  /**
    * OnMemberLeft event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
    * @param {TelegramConfigType} config
+   * @param {PlayerRepository} playerRepository
    * @param {Logger} logger
    */
   static async init(
     bot: TelegramBot,
     msg: Message,
     config: TelegramConfigType,
+    playerRepository: PlayerRepository,
     logger: Logger,
   ): Promise<void> {
     try {
-      await OnMemberLeftHandler.playerRepository.findOneAndRemove({
+      await playerRepository.findOneAndRemove({
         telegramUserId: msg.left_chat_member.id,
       });
       await bot.sendMessage(

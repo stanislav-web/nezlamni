@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   PlayerContent,
   PlayerContentDocument,
 } from '../schemas/player-content.schema';
-import { Player, PlayerDocument } from '../schemas/player.schema';
+import { Player } from '../schemas/player.schema';
 
 @Injectable()
 export class PlayerContentRepository {
@@ -28,11 +28,15 @@ export class PlayerContentRepository {
 
   /**
    * Get players content list
-   * @param {any} filter
+   * @param {Partial<PlayerContent>} filter
+   * @param {number} limit
    * @return Promise<PlayerContent[] | null>
    */
-  async findAll(filter?: any): Promise<PlayerContent[] | null> {
-    return this.playerContentModel.find(filter).exec();
+  async findAll(
+    filter?: Partial<PlayerContent>,
+    limit?: number,
+  ): Promise<PlayerContent[] | null> {
+    return this.playerContentModel.find(filter).limit(limit).exec();
   }
 
   /**

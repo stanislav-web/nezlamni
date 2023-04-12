@@ -207,6 +207,7 @@ export class NezlamniBotService {
         NezlamniBotService.bot,
         msg,
         NezlamniBotService.config,
+        NezlamniBotService.playerRepository,
         NezlamniBotService.logger,
       );
     }
