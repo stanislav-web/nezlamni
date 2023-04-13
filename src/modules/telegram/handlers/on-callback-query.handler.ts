@@ -7,6 +7,7 @@ import {
 } from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { escapeString, isEmpty } from '../../../common/utils/string.util';
+import { GameplayConfigType } from '../../../configs/types/gameplay.config.type';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import {
   countries,
@@ -44,6 +45,7 @@ export class OnCallbackQueryHandler {
    * @param {TelegramBot} bot
    * @param {CallbackQuery} query
    * @param {TelegramConfigType} config
+   * @param {GameplayConfigType} gameplayConfig
    * @param {PlayerRepository} playerRepository
    * @param {Logger} logger
    */
@@ -51,6 +53,7 @@ export class OnCallbackQueryHandler {
     bot: TelegramBot,
     query: CallbackQuery,
     config: TelegramConfigType,
+    gameplayConfig: GameplayConfigType,
     playerRepository: PlayerRepository,
     logger: Logger,
   ): Promise<void> {
@@ -72,7 +75,12 @@ export class OnCallbackQueryHandler {
           );
           break;
         case GOAL_COMMAND_PRIVATE.COMMAND:
-          await OnCallbackQueryHandler.setGoalQueryHandler(bot, query, config);
+          await OnCallbackQueryHandler.setGoalQueryHandler(
+            bot,
+            query,
+            config,
+            gameplayConfig,
+          );
           break;
         case PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
           PLAYERS_LIST_COMMAND_PUBLIC.COMMAND:
@@ -139,18 +147,21 @@ export class OnCallbackQueryHandler {
    * Set goal callback query handler
    * @param {TelegramBot} bot
    * @param {CallbackQuery} query
-   * @param  {TelegramConfigType} config,
+   * @param  {TelegramConfigType} config
+   * @param  {GameplayConfigType} gameplayConf
    * @return Promise<TelegramBot.Message | void>
    */
   private static setGoalQueryHandler(
     bot: TelegramBot,
     query: CallbackQuery,
     config: TelegramConfigType,
+    gameplayConf: GameplayConfigType,
   ): Promise<TelegramBot.Message | void> {
     return bot.sendMessage(
       query.from.id,
       message(ON_SET_GOAL_MESSAGE, {
         exampleLink: `${config.getStaticContentUrl()}/examples/goal.png`,
+        limit: gameplayConf.getGameplayGoalsUploadLimit(),
       }),
       {
         parse_mode: config.getMessageParseMode(),

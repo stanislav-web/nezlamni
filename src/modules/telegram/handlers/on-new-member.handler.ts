@@ -37,6 +37,7 @@ export class OnNewMemberHandler {
             parse_mode: config.getMessageParseMode(),
           },
         );
+        await bot.leaveChat(msg.chat.id);
       } else {
         await bot.sendMessage(
           msg.chat.id,

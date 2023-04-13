@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { HttpCode, Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
@@ -36,9 +36,14 @@ export class OnMemberLeftHandler {
       );
     } catch (error) {
       logger.error(error);
-      await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
-        parse_mode: config.getMessageParseMode(),
-      });
+      if (
+        error?.response?.body?.error_code !== 403 &&
+        error?.response?.body?.ok !== false
+      ) {
+        await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+          parse_mode: config.getMessageParseMode(),
+        });
+      }
     }
   }
 }

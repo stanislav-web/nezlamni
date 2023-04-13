@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { PlayerContentTypeEnum } from '../enums/player-content-type.enum';
 import {
   PlayerContent,
   PlayerContentDocument,
@@ -22,8 +23,14 @@ export class PlayerContentRepository {
   async add(
     content: Partial<PlayerContent>,
   ): Promise<PlayerContent & { _id: Types.ObjectId }> {
-    const created = new this.playerContentModel(content);
-    return await created.save();
+    return this.playerContentModel.findOneAndUpdate(
+      {
+        player: content.player,
+        type: content.type,
+      },
+      content,
+      { upsert: true },
+    );
   }
 
   /**
@@ -58,5 +65,17 @@ export class PlayerContentRepository {
    */
   async findOneAndRemove(filter: Partial<PlayerContent>): Promise<any> {
     return this.playerContentModel.findOneAndRemove(filter, {});
+  }
+
+  /**
+   * Find player content by credentials
+   * @param {Partial<PlayerContent>} filter
+   * @return Promise<PlayerContent & { _id: Types.ObjectId }>
+   */
+  async findOne(filter: {
+    player: Player;
+    type: PlayerContentTypeEnum;
+  }): Promise<PlayerContent & { _id: Types.ObjectId }> {
+    return this.playerContentModel.findOne(filter);
   }
 }

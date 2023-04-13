@@ -1,5 +1,9 @@
 import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
+import {
+  createResource,
+  deleteResource,
+} from '../../../common/utils/file.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { isEmpty } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
@@ -50,7 +54,7 @@ export class OnSetGoalDoneHandler {
         parse_mode: config.getMessageParseMode(),
       });
     } else {
-      const regex = /^(ЧС|ЛЧ|ЛЄ|УПЛ|ПУЛ),+.(.*)$/;
+      const regex = /^(ЧС|ЛЧ|ЛЄ|ЛК|УПЛ|ПУЛ|ДУЛ),+.(.*)$/;
       const caption = msg.caption.trim();
       if (!regex.test(caption)) {
         await bot.sendMessage(
@@ -71,19 +75,31 @@ export class OnSetGoalDoneHandler {
               parse_mode: config.getMessageParseMode(),
             });
           } else {
-            const uploadDir = `${config.getUploadFilesPath()}/goals/`;
-            const uploadFile = await bot.downloadFile(
+            const uploadDir = `${config.getUploadFilesPath()}/${
+              player.telegramUserId
+            }/goals/`;
+            const playerContent =
+              await OnSetGoalDoneHandler.playerContentRepository.findOne({
+                player,
+                type: PlayerContentTypeEnum.GOAL,
+              });
+            if (playerContent) {
+              await deleteResource(playerContent.filePath);
+            } else {
+              await createResource(uploadDir);
+            }
+            const uploadedFile = await bot.downloadFile(
               msg.video.file_id,
               uploadDir,
             );
-
             await OnSetGoalDoneHandler.playerContentRepository.add({
               player,
               type: PlayerContentTypeEnum.GOAL,
               caption,
               fileId: msg.video.file_id,
-              filePath: uploadFile,
+              filePath: uploadedFile,
             });
+
             await bot.sendMessage(
               msg.chat.id,
               message(ON_SET_GOAL_DONE_MESSAGE, {

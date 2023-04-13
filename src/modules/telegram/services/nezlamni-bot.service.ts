@@ -192,7 +192,6 @@ export class NezlamniBotService {
    * @param {Message} msg
    */
   async onNewMember(msg: Message): Promise<void> {
-    NezlamniBotService.logger.debug(`onNewMember event`);
     if (!msg.from.is_bot) {
       NezlamniBotService.logger.debug(`onNewMember event`);
       NezlamniBotService.logger.log(msg);
@@ -377,6 +376,7 @@ export class NezlamniBotService {
         NezlamniBotService.bot,
         query,
         NezlamniBotService.config,
+        NezlamniBotService.gameplayConf,
         NezlamniBotService.playerRepository,
         NezlamniBotService.logger,
       );
