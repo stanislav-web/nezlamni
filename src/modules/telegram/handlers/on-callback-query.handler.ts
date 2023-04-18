@@ -268,6 +268,7 @@ export class OnCallbackQueryHandler {
             },
           );
         }
+
         const poll = await bot.sendPoll(
           query.from.id,
           message(ON_POLL_START, { round }),
