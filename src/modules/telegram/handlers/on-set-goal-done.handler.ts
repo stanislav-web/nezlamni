@@ -85,6 +85,7 @@ export class OnSetGoalDoneHandler {
               msg.video.file_id,
               uploadDir,
             );
+
             await playerContentRepository.add({
               player,
               type: PlayerContentTypeEnum.GOAL,
