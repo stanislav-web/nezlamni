@@ -270,7 +270,7 @@ export class OnCallbackQueryHandler {
 
         const response = await bot.sendPoll(
           query.from.id,
-          message(ON_POLL_START, { round }),
+          message(ON_POLL_START, { round: round }),
           answers,
           {
             is_anonymous: false,
