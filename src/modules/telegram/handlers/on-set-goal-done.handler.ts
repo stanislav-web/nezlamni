@@ -3,6 +3,7 @@ import TelegramBot, { Message } from 'node-telegram-bot-api';
 import {
   createResource,
   deleteResource,
+  isResourceExist,
 } from '../../../common/utils/file.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { isEmpty } from '../../../common/utils/string.util';
@@ -62,20 +63,19 @@ export class OnSetGoalDoneHandler {
               parse_mode: config.getMessageParseMode(),
             });
           } else {
-            const uploadDir = `${config.getUploadFilesPath()}/${
-              player.telegramUserId
-            }/goals/`;
             const playerContent = await playerContentRepository.findOne({
               player,
               type: PlayerContentTypeEnum.GOAL,
             });
-            try {
-              if (playerContent) {
-                await deleteResource(playerContent.filePath);
-              } else {
-                await createResource(uploadDir);
-              }
-            } catch (e) {}
+            const uploadDir = `${config.getUploadFilesPath()}/${
+              player.telegramUserId
+            }/goals/`;
+            if (playerContent) {
+              const isExist = await isResourceExist(playerContent.filePath);
+              if (isExist) await deleteResource(playerContent.filePath);
+            } else {
+              await createResource(uploadDir);
+            }
 
             const uploadedFile = await bot.downloadFile(
               msg.video.file_id,

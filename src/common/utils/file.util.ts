@@ -19,7 +19,7 @@ export const createResource = async (dir: string): Promise<void> => {
  * @param {string} path
  * @return Promise<void>
  */
-const isResourceExist = async (path: string): Promise<boolean> =>
+export const isResourceExist = async (path: string): Promise<boolean> =>
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   !!(await fs.promises.stat(path).catch((e) => false));
 
