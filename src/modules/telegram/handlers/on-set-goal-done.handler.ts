@@ -21,16 +21,6 @@ import { Player } from '../schemas/player.schema';
 
 export class OnSetGoalDoneHandler {
   /**
-   * @param {PlayerRepository} playerRepository
-   * @private
-   */
-  private static playerRepository: PlayerRepository;
-  /**
-   * @param {PlayerContentRepository} playerContentRepository
-   * @private
-   */
-  private static playerContentRepository: PlayerContentRepository;
-  /**
    * OnSetGoalDone event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
@@ -47,8 +37,6 @@ export class OnSetGoalDoneHandler {
     playerContentRepository: PlayerContentRepository,
     logger: Logger,
   ): Promise<void> {
-    OnSetGoalDoneHandler.playerRepository = playerRepository;
-    OnSetGoalDoneHandler.playerContentRepository = playerContentRepository;
     if (!('caption' in msg) && !('video' in msg)) {
       await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
         parse_mode: config.getMessageParseMode(),
@@ -66,10 +54,9 @@ export class OnSetGoalDoneHandler {
         );
       } else {
         try {
-          const player: Player =
-            await OnSetGoalDoneHandler.playerRepository.findOne({
-              telegramUserId: msg.from.id,
-            });
+          const player: Player = await playerRepository.findOne({
+            telegramUserId: msg.from.id,
+          });
           if (isEmpty(player)) {
             await bot.sendMessage(msg.chat.id, message(ERROR_NOT_REGISTERED), {
               parse_mode: config.getMessageParseMode(),
@@ -78,11 +65,10 @@ export class OnSetGoalDoneHandler {
             const uploadDir = `${config.getUploadFilesPath()}/${
               player.telegramUserId
             }/goals/`;
-            const playerContent =
-              await OnSetGoalDoneHandler.playerContentRepository.findOne({
-                player,
-                type: PlayerContentTypeEnum.GOAL,
-              });
+            const playerContent = await playerContentRepository.findOne({
+              player,
+              type: PlayerContentTypeEnum.GOAL,
+            });
             if (playerContent) {
               await deleteResource(playerContent.filePath);
             } else {
@@ -92,7 +78,7 @@ export class OnSetGoalDoneHandler {
               msg.video.file_id,
               uploadDir,
             );
-            await OnSetGoalDoneHandler.playerContentRepository.add({
+            await playerContentRepository.add({
               player,
               type: PlayerContentTypeEnum.GOAL,
               caption,

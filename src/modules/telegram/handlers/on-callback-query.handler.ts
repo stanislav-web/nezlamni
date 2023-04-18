@@ -25,6 +25,7 @@ import {
 import {
   ERROR_GAP_MESSAGE,
   ERROR_GET_PLAYERS,
+  ERROR_UNREGISTERED,
   ON_SET_GOAL_MESSAGE,
   ON_SET_NATION_MESSAGE,
   ON_SET_NICKNAME_MESSAGE,
@@ -56,9 +57,29 @@ export class OnCallbackQueryHandler {
     gameplayConfig: GameplayConfigType,
     playerRepository: PlayerRepository,
     logger: Logger,
-  ): Promise<void> {
+  ): Promise<TelegramBot.Message | void> {
     try {
       OnCallbackQueryHandler.playerRepository = playerRepository;
+      const member = await bot.getChatMember(
+        config.getNotificationChannel(),
+        query.from.id,
+      );
+      if (!member) {
+        const chat: TelegramBot.Chat = await bot.getChat(
+          config.getNotificationChannel(),
+        );
+        return await bot.sendMessage(
+          query.from.id,
+          message(ERROR_UNREGISTERED, {
+            channelName: chat.title,
+            channelLink: chat.invite_link,
+          }),
+          {
+            parse_mode: config.getMessageParseMode(),
+          },
+        );
+      }
+
       switch (query.data) {
         case NICKNAME_COMMAND_PRIVATE.COMMAND:
           await OnCallbackQueryHandler.setNicknameQueryHandler(

@@ -100,6 +100,14 @@ export default registerAs(
      */
     getGroupAdminId: (): number =>
       parseInt(getEnv('TELEGRAM_GROUP_ADMIN_ID', true)),
+
+    /**
+     * Get group moderators ids
+     * @return string[]
+     */
+    getGroupModeratorsIds: (): string[] =>
+      getEnv('TELEGRAM_GROUP_MODERATORS_IDS', true).split(/,/u),
+
     /**
      * Get group admin id
      * @return {string}

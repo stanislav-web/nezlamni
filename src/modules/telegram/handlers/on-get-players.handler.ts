@@ -23,12 +23,6 @@ import { Player } from '../schemas/player.schema';
 
 export class OnGetPlayersHandler {
   /**
-   * @param {PlayerRepository} playerRepository
-   * @private
-   */
-  private static playerRepository: PlayerRepository;
-
-  /**
    * OnGetPlayers event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
@@ -44,9 +38,7 @@ export class OnGetPlayersHandler {
     logger: Logger,
   ): Promise<void> {
     try {
-      OnGetPlayersHandler.playerRepository = playerRepository;
-      const players: Player[] =
-        await OnGetPlayersHandler.playerRepository.findAll();
+      const players: Player[] = await playerRepository.findAll();
       if (!players)
         await bot.sendMessage(msg.chat.id, message(ERROR_GET_PLAYERS), {
           parse_mode: config.getMessageParseMode(),

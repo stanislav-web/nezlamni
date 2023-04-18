@@ -38,6 +38,28 @@ export const findInArrayInsensitive = (
  * @param {object[]} array
  * @param {object} props
  */
-export const addProps = (array: object[], props: object) => {
+export const addProps = (array: object[], props: object): object[] => {
   return array.map((obj) => ({ ...obj, ...props }));
+};
+
+/**
+ * Check if string or number in array
+ * @param {string[]} array
+ * @param {string | number} str
+ */
+export const isInArray = (array: string[], str: string | number): boolean =>
+  array.includes(str.toString());
+
+/**
+ * Split array to chunks
+ * @param {any[]} array
+ * @param {number} size
+ */
+export const arrayBatching = <T>(array: T[], size: number): T[][] => {
+  const arr = [];
+  for (let i = 0; i < array.length; i += size) {
+    const chunk = array.slice(i, i + size);
+    arr.push(chunk);
+  }
+  return arr;
 };

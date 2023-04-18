@@ -13,12 +13,6 @@ import { PlayerRepository } from '../repositories/player.repository';
 
 export class OnSetNicknameDoneHandler {
   /**
-   * @param {PlayerRepository} playerRepository
-   * @private
-   */
-  private static playerRepository: PlayerRepository;
-
-  /**
    * OnSetNicknameDone event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
@@ -53,26 +47,24 @@ export class OnSetNicknameDoneHandler {
           },
         );
       }
-      OnSetNicknameDoneHandler.playerRepository = playerRepository;
       if (!('text' in msg)) {
         await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
           parse_mode: config.getMessageParseMode(),
         });
       } else {
         const text = msg.text.trim();
-        const player =
-          await OnSetNicknameDoneHandler.playerRepository.findOneAndUpdate(
-            {
-              telegramUserId: msg.from.id,
-            },
-            {
-              telegramChannelId: config.getNotificationChannel(),
-              playerNickname: msg.text,
-              telegramFirstName: msg.from.first_name,
-            },
-          );
+        const player = await playerRepository.findOneAndUpdate(
+          {
+            telegramUserId: msg.from.id,
+          },
+          {
+            telegramChannelId: config.getNotificationChannel(),
+            playerNickname: msg.text,
+            telegramFirstName: msg.from.first_name,
+          },
+        );
         if (isEmpty(player))
-          await OnSetNicknameDoneHandler.playerRepository.create({
+          await playerRepository.create({
             telegramChannelId: config.getNotificationChannel(),
             telegramUserId: msg.from.id,
             telegramFirstName: msg.from.first_name.trim(),

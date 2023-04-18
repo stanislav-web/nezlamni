@@ -21,12 +21,6 @@ import { Player } from '../schemas/player.schema';
 
 export class OnSetNationDoneHandler {
   /**
-   * @param {PlayerRepository} playerRepository
-   * @private
-   */
-  private static playerRepository: PlayerRepository;
-
-  /**
    * OnSetNationDone event handler
    * @param {TelegramBot} bot
    * @param {Message} msg
@@ -41,7 +35,6 @@ export class OnSetNationDoneHandler {
     playerRepository: PlayerRepository,
     logger: Logger,
   ): Promise<void> {
-    OnSetNationDoneHandler.playerRepository = playerRepository;
     if (!('text' in msg)) {
       await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
         parse_mode: config.getMessageParseMode(),
@@ -49,10 +42,9 @@ export class OnSetNationDoneHandler {
     } else {
       const text = msg.text.trim();
       try {
-        const player: Player =
-          await OnSetNationDoneHandler.playerRepository.findOne({
-            telegramUserId: msg.from.id,
-          });
+        const player: Player = await playerRepository.findOne({
+          telegramUserId: msg.from.id,
+        });
         if (isEmpty(player)) {
           await bot.sendMessage(msg.chat.id, message(ERROR_NOT_REGISTERED), {
             parse_mode: config.getMessageParseMode(),
@@ -74,10 +66,9 @@ export class OnSetNationDoneHandler {
             const country = countryByCode
               ? (countryByCode as CountryListItemType)
               : (countryByName as CountryListItemType);
-            const player: Player =
-              await OnSetNationDoneHandler.playerRepository.findOne({
-                playerNation: country.code,
-              });
+            const player: Player = await playerRepository.findOne({
+              playerNation: country.code,
+            });
             if (!isEmpty(player)) {
               await bot.sendMessage(
                 msg.chat.id,
@@ -91,7 +82,7 @@ export class OnSetNationDoneHandler {
                 },
               );
             } else {
-              await OnSetNationDoneHandler.playerRepository.findOneAndUpdate(
+              await playerRepository.findOneAndUpdate(
                 {
                   telegramUserId: msg.from.id,
                 },

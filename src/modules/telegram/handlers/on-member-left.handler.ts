@@ -1,6 +1,7 @@
-import { HttpCode, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { message } from '../../../common/utils/placeholder.util';
+import { isEmpty } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
 import { ERROR_GAP_MESSAGE, ON_MEMBER_LEFT } from '../messages';
 import { PlayerRepository } from '../repositories/player.repository';
@@ -22,18 +23,23 @@ export class OnMemberLeftHandler {
     logger: Logger,
   ): Promise<void> {
     try {
-      await playerRepository.findOneAndRemove({
+      const player = await playerRepository.findOne({
         telegramUserId: msg.left_chat_member.id,
       });
-      await bot.sendMessage(
-        msg.chat.id,
-        message(ON_MEMBER_LEFT, {
-          username: msg.left_chat_member.first_name,
-        }),
-        {
-          parse_mode: config.getMessageParseMode(),
-        },
-      );
+      if (!isEmpty(player)) {
+        await playerRepository.findOneAndRemove({
+          telegramUserId: msg.left_chat_member.id,
+        });
+        await bot.sendMessage(
+          msg.chat.id,
+          message(ON_MEMBER_LEFT, {
+            username: msg.left_chat_member.first_name,
+          }),
+          {
+            parse_mode: config.getMessageParseMode(),
+          },
+        );
+      }
     } catch (error) {
       logger.error(error);
       if (

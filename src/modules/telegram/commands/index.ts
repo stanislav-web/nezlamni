@@ -62,3 +62,9 @@ export const GOAL_COMMAND_PUBLIC = {
   REGEXP: /\/goal@NezlamniFifaBot$/,
   BTN: '⚽️ Відправити гол',
 };
+
+export const GOAL_POLL_COMMAND_PRIVATE = {
+  COMMAND: '/goal_poll_moder',
+  REGEXP: /\/goal_poll_moder$/,
+  BTN: '📊️ Розпочати голосування за кращий гол',
+};

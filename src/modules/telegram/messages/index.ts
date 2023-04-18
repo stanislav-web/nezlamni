@@ -12,11 +12,12 @@ import {
   ERROR_SET_GOAL_RESTRICT,
   ERROR_SET_GOAL_CAPTION_FORMAT,
   ERROR_UNREGISTERED,
+  ERROR_START_GOAL_POLL_NO_GOALS,
 } from './errors.message';
 import { INVITE_LINK_MESSAGE } from './invite-link.message';
 import { ON_MEMBER_LEFT } from './on-member-left.message';
 import { ON_NEW_MEMBER } from './on-new-member.message';
-import { ON_POLL } from './on-poll.message';
+import { ON_POLL_START } from './on-poll-start.message';
 import { ON_SET_GOAL_DONE_MESSAGE } from './on-set-goal-done.message';
 import { ON_SET_GOAL_MESSAGE } from './on-set-goal.message';
 import { ON_SET_NATION_DONE_MESSAGE } from './on-set-nation-done.message';
@@ -30,6 +31,8 @@ import { PLAYERS_LIST_MESSAGE } from './players-list.message';
 export {
   ON_START_PUBLIC_MESSAGE,
   ERROR_RESTRICT_ADD,
+  ERROR_START_GOAL_POLL_NO_GOALS,
+  ON_POLL_START,
   ERROR_SET_NATION_CONFLICT,
   ERROR_SET_NATION_FORMAT,
   ERROR_NOT_REGISTERED,

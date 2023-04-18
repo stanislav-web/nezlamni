@@ -37,6 +37,12 @@ export type TelegramConfigType = {
   getGroupAdminName(): string;
 
   /**
+   * Get group moderators ids
+   * @return string[]
+   */
+  getGroupModeratorsIds(): string[];
+
+  /**
    * Get maximum allowed connections
    * @return number
    */
