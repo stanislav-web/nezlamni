@@ -60,6 +60,18 @@ export type TelegramConfigType = {
   getNotificationChannel(): number;
 
   /**
+   * Get poll open period (sec)
+   * @return {boolean}
+   */
+  getPollOpenPeriod(): number;
+
+  /**
+   * Get poll parse mode
+   * @return {ParseMode}
+   */
+  getPollParseMode(): ParseMode;
+
+  /**
    * Get pooling interval (sec)
    * @return {number}
    */

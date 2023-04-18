@@ -243,17 +243,16 @@ export class OnCallbackQueryHandler {
       const batches = arrayBatching(goals, 10);
       let isPinned = false;
       const answers = [];
-      console.log('BATCHES', batches);
       for (let round = 0; round < batches.length; round++) {
         await Promise.all(
           batches[round].map(async (content, index): Promise<void> => {
-            const caption = `${++index}. ⚽️ ${content.caption}`;
+            const caption = `*${++index}.*   ⚽️ ${content.caption}`;
             const filePath = `${config
               .getStaticContentUrl()
               .replace('data', '')}${content.filePath}`;
             answers.push(caption);
             await bot.sendVideo(query.from.id, filePath, {
-              has_spoiler: true,
+              has_spoiler: false,
               caption: caption,
               parse_mode: config.getMessageParseMode(),
             });
@@ -269,7 +268,7 @@ export class OnCallbackQueryHandler {
           );
         }
 
-        const poll = await bot.sendPoll(
+        const response = await bot.sendPoll(
           query.from.id,
           message(ON_POLL_START, { round }),
           answers,
@@ -277,12 +276,13 @@ export class OnCallbackQueryHandler {
             is_anonymous: false,
             allows_multiple_answers: false,
             type: 'regular',
-            open_period: 60,
-            explanation_parse_mode: config.getMessageParseMode(),
+            open_period: config.getPollOpenPeriod(),
+            explanation_parse_mode: config.getPollParseMode(),
           },
         );
+
         if (!isPinned)
-          await bot.pinChatMessage(query.from.id, poll.message_id, {
+          await bot.pinChatMessage(query.from.id, response.message_id, {
             disable_notification: false,
           });
         isPinned = true;

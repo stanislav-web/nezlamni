@@ -127,5 +127,18 @@ export default registerAs(
      */
     getUploadFilesPath: (): string =>
       getEnv('TELEGRAM_UPLOAD_FILES_PATH', true),
+
+    /**
+     * Get poll open period (sec)
+     * @return {boolean}
+     */
+    getPollOpenPeriod: (): number => parseInt(getEnv('c', true)),
+
+    /**
+     * Get poll parse mode
+     * @return {ParseMode}
+     */
+    getPollParseMode: (): ParseMode =>
+      getEnv('TELEGRAM_POLL_PARSE_MODE', true) as ParseMode,
   }),
 );
