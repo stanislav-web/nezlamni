@@ -247,18 +247,15 @@ export class OnCallbackQueryHandler {
         await Promise.all(
           batches[round].map(async (content, index): Promise<void> => {
             const caption = `${++index}. ⚽️ ${content.caption}`;
+            const filePath = `${config
+              .getStaticContentUrl()
+              .replace('data', '')}${content.filePath}`;
             answers.push(caption);
-            await bot.sendVideo(
-              query.from.id,
-              `${config.getStaticContentUrl().replace('data', '')}${
-                content.filePath
-              }`,
-              {
-                has_spoiler: true,
-                caption: caption,
-                parse_mode: config.getMessageParseMode(),
-              },
-            );
+            await bot.sendVideo(query.from.id, filePath, {
+              has_spoiler: true,
+              caption: caption,
+              parse_mode: config.getMessageParseMode(),
+            });
           }),
         );
 

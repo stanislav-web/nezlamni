@@ -11,7 +11,7 @@
 .env.production
 
 # Data
-/data/postgres
+/data/players
 
 # Modules
 dist
