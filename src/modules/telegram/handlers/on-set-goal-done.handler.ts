@@ -70,16 +70,14 @@ export class OnSetGoalDoneHandler {
             const uploadDir = `${config.getUploadFilesPath()}/${
               player.telegramUserId
             }/goals/`;
-            console.log('playerContent', playerContent);
-            if (playerContent) {
-              try {
-                const isExist = await isResourceExist(playerContent.filePath);
-                console.log('isEXIST', isExist);
-                if (isExist) await deleteResource(playerContent.filePath);
-              } catch (e) {
-                console.log('ERROR EXIST', e);
-              }
-            } else {
+            const isFilePathExist = await isResourceExist(
+              playerContent.filePath,
+            );
+            if (playerContent && isFilePathExist) {
+              await deleteResource(playerContent.filePath);
+            } else if (playerContent && !isFilePathExist) {
+              await createResource(uploadDir);
+            } else if (!playerContent && !isFilePathExist) {
               await createResource(uploadDir);
             }
 
@@ -107,7 +105,6 @@ export class OnSetGoalDoneHandler {
             );
           }
         } catch (error) {
-          console.log(error);
           logger.error(error);
           await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
             parse_mode: config.getMessageParseMode(),
