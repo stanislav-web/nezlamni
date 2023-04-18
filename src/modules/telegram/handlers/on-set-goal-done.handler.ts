@@ -101,6 +101,7 @@ export class OnSetGoalDoneHandler {
             );
           }
         } catch (error) {
+          console.log(error);
           logger.error(error);
           await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
             parse_mode: config.getMessageParseMode(),
