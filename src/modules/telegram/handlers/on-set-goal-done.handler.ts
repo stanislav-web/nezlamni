@@ -69,11 +69,14 @@ export class OnSetGoalDoneHandler {
               player,
               type: PlayerContentTypeEnum.GOAL,
             });
-            if (playerContent) {
-              await deleteResource(playerContent.filePath);
-            } else {
-              await createResource(uploadDir);
-            }
+            try {
+              if (playerContent) {
+                await deleteResource(playerContent.filePath);
+              } else {
+                await createResource(uploadDir);
+              }
+            } catch (e) {}
+
             const uploadedFile = await bot.downloadFile(
               msg.video.file_id,
               uploadDir,
