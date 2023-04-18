@@ -76,6 +76,10 @@ export class OnSetGoalDoneHandler {
               player.telegramUserId
             }/goals/`;
 
+            logger.log({ playerContent });
+            logger.log({ uploadDir });
+            logger.log({ video: msg.video });
+
             if (playerContent) {
               const isFilePathExist = await isResourceExist(
                 playerContent.filePath,
@@ -85,6 +89,7 @@ export class OnSetGoalDoneHandler {
             } else {
               await createResource(uploadDir);
             }
+
             const uploadedFile = await bot.downloadFile(
               msg.video.file_id,
               uploadDir,
