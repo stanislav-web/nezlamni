@@ -8,7 +8,6 @@ import { OnSetNationDoneHandler } from './on-set-nation-done.handler';
 import { OnSetNationHandler } from './on-set-nation.handler';
 import { OnSetNicknameDoneHandler } from './on-set-nickname-done.handler';
 import { OnSetNicknameHandler } from './on-set-nickname.handler';
-import { OnStartGoalPollHandler } from './on-start-goal-poll.handler';
 import { OnStartHandler } from './on-start.handler';
 
 export {
@@ -23,5 +22,4 @@ export {
   OnCallbackQueryHandler,
   OnGetPlayersHandler,
   OnSetGoalDoneHandler,
-  OnStartGoalPollHandler,
 };

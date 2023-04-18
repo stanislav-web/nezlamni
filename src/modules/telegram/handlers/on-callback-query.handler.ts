@@ -2,7 +2,9 @@ import { Logger } from '@nestjs/common';
 import TelegramBot, { CallbackQuery } from 'node-telegram-bot-api';
 import { getBorderCharacters, table } from 'table';
 import {
+  arrayBatching,
   findInArrayInsensitive,
+  isInArray,
   sortAscBy,
 } from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
@@ -17,21 +19,27 @@ import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE,
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
   GOAL_COMMAND_PRIVATE,
+  GOAL_POLL_COMMAND_PRIVATE,
   NATION_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
 } from '../commands';
+import { PlayerContentTypeEnum } from '../enums/player-content-type.enum';
 import {
   ERROR_GAP_MESSAGE,
   ERROR_GET_PLAYERS,
+  ERROR_START_GOAL_POLL_NO_GOALS,
   ERROR_UNREGISTERED,
+  ON_POLL_START,
   ON_SET_GOAL_MESSAGE,
   ON_SET_NATION_MESSAGE,
   ON_SET_NICKNAME_MESSAGE,
   PLAYERS_LIST_MESSAGE,
 } from '../messages';
+import { PlayerContentRepository } from '../repositories/player-content.repository';
 import { PlayerRepository } from '../repositories/player.repository';
+import { PlayerContent } from '../schemas/player-content.schema';
 import { Player } from '../schemas/player.schema';
 
 export class OnCallbackQueryHandler {
@@ -42,12 +50,19 @@ export class OnCallbackQueryHandler {
   private static playerRepository: PlayerRepository;
 
   /**
+   * @param {PlayerContentRepository} playerContentRepository
+   * @private
+   */
+  private static playerContentRepository: PlayerContentRepository;
+
+  /**
    * OnCallbackQuery event handler
    * @param {TelegramBot} bot
    * @param {CallbackQuery} query
    * @param {TelegramConfigType} config
    * @param {GameplayConfigType} gameplayConfig
    * @param {PlayerRepository} playerRepository
+   * @param {PlayerContentRepository} playerContentRepository
    * @param {Logger} logger
    */
   static async init(
@@ -56,10 +71,12 @@ export class OnCallbackQueryHandler {
     config: TelegramConfigType,
     gameplayConfig: GameplayConfigType,
     playerRepository: PlayerRepository,
+    playerContentRepository: PlayerContentRepository,
     logger: Logger,
   ): Promise<TelegramBot.Message | void> {
     try {
       OnCallbackQueryHandler.playerRepository = playerRepository;
+      OnCallbackQueryHandler.playerContentRepository = playerContentRepository;
       const member = await bot.getChatMember(
         config.getNotificationChannel(),
         query.from.id,
@@ -102,6 +119,9 @@ export class OnCallbackQueryHandler {
             config,
             gameplayConfig,
           );
+          break;
+        case GOAL_POLL_COMMAND_PRIVATE.COMMAND:
+          await OnCallbackQueryHandler.startGoalPoll(bot, query, config);
           break;
         case PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
           PLAYERS_LIST_COMMAND_PUBLIC.COMMAND:
@@ -188,6 +208,72 @@ export class OnCallbackQueryHandler {
         parse_mode: config.getMessageParseMode(),
       },
     );
+  }
+
+  /**
+   * Start goals poll callback query handler
+   * @param {TelegramBot} bot
+   * @param {CallbackQuery} query
+   * @param  {TelegramConfigType} config
+   * @return Promise<TelegramBot.Message | void>
+   */
+  private static async startGoalPoll(
+    bot: TelegramBot,
+    query: CallbackQuery,
+    config: TelegramConfigType,
+  ): Promise<TelegramBot.Message | void> {
+    if (isInArray(config.getGroupModeratorsIds(), query.from.id)) {
+      const goals: PlayerContent[] =
+        await OnCallbackQueryHandler.playerContentRepository.findAll({
+          isPolled: false,
+          type: PlayerContentTypeEnum.GOAL,
+        });
+      const count = goals.length;
+      if (count <= 0) {
+        return await bot.sendMessage(
+          query.from.id,
+          message(ERROR_START_GOAL_POLL_NO_GOALS),
+          {
+            parse_mode: config.getMessageParseMode(),
+          },
+        );
+      }
+
+      const batches = arrayBatching(goals, 10);
+      let isPinned = false;
+      const answers = [];
+      for (let round = 0; round < batches.length; round++) {
+        await Promise.all(
+          batches[round].map(async (content, index): Promise<void> => {
+            const caption = `${++index}. ⚽️ ${content.caption}`;
+            answers.push(caption);
+            await bot.sendVideo(query.from.id, content.filePath, {
+              has_spoiler: true,
+              caption: caption,
+              parse_mode: config.getMessageParseMode(),
+            });
+          }),
+        );
+
+        const poll = await bot.sendPoll(
+          query.from.id,
+          message(ON_POLL_START, { round }),
+          answers,
+          {
+            is_anonymous: false,
+            allows_multiple_answers: false,
+            type: 'regular',
+            open_period: 60,
+            explanation_parse_mode: config.getMessageParseMode(),
+          },
+        );
+        if (!isPinned)
+          await bot.pinChatMessage(query.from.id, poll.message_id, {
+            disable_notification: false,
+          });
+        isPinned = true;
+      }
+    }
   }
 
   /**

@@ -1,7 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import TelegramBot, { CallbackQuery, Message } from 'node-telegram-bot-api';
-import { isInArray } from '../../../common/utils/array.util';
 import { isEmpty } from '../../../common/utils/string.util';
 import { gameplayConfig, telegramConfig } from '../../../configs';
 import { MemoryDbStorageProvider } from '../../storage/providers/memory-db.provider';
@@ -10,7 +9,6 @@ import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
   GOAL_COMMAND_PRIVATE,
   GOAL_COMMAND_PUBLIC,
-  GOAL_POLL_COMMAND_PRIVATE,
   NATION_COMMAND_PRIVATE,
   NATION_COMMAND_PUBLIC,
   NICKNAME_COMMAND_PRIVATE,
@@ -31,7 +29,6 @@ import {
   OnSetNationHandler,
   OnSetNicknameDoneHandler,
   OnSetNicknameHandler,
-  OnStartGoalPollHandler,
   OnStartHandler,
 } from '../handlers';
 import { OnGetChannelScheduleHandler } from '../handlers/on-get-channel-schedule.handler';
@@ -149,10 +146,6 @@ export class NezlamniBotService {
     );
     NezlamniBotService.bot.onText(GOAL_COMMAND_PUBLIC.REGEXP, this.onSetGoal);
     NezlamniBotService.bot.onText(GOAL_COMMAND_PRIVATE.REGEXP, this.onSetGoal);
-    NezlamniBotService.bot.onText(
-      GOAL_POLL_COMMAND_PRIVATE.REGEXP,
-      this.onSetGoalPoll,
-    );
     NezlamniBotService.bot.onText(
       PLAYERS_LIST_COMMAND_PUBLIC.REGEXP,
       this.onPlayersList,
@@ -330,31 +323,6 @@ export class NezlamniBotService {
   }
 
   /**
-   * onSetGoalPoll event /goal_poll_moder
-   * @param {Message} msg
-   */
-  async onSetGoalPoll(msg: Message): Promise<void> {
-    if (
-      isInArray(
-        NezlamniBotService.config.getGroupModeratorsIds(),
-        msg.from.id,
-      ) &&
-      msg.text === GOAL_POLL_COMMAND_PRIVATE.COMMAND
-    ) {
-      NezlamniBotService.logger.debug(`onSetGoalPoll event`);
-      NezlamniBotService.session.destroy();
-      await OnStartGoalPollHandler.init(
-        NezlamniBotService.bot,
-        msg,
-        NezlamniBotService.playerRepository,
-        NezlamniBotService.playerContentRepository,
-        NezlamniBotService.config,
-        NezlamniBotService.logger,
-      );
-    }
-  }
-
-  /**
    * onPlayersList event /players
    * @param {Message} msg
    */
@@ -410,6 +378,7 @@ export class NezlamniBotService {
         NezlamniBotService.config,
         NezlamniBotService.gameplayConf,
         NezlamniBotService.playerRepository,
+        NezlamniBotService.playerContentRepository,
         NezlamniBotService.logger,
       );
     }
