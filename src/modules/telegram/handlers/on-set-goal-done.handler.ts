@@ -72,6 +72,7 @@ export class OnSetGoalDoneHandler {
             }/goals/`;
             if (playerContent) {
               const isExist = await isResourceExist(playerContent.filePath);
+              console.log('isEXIST', isExist);
               if (isExist) await deleteResource(playerContent.filePath);
             } else {
               await createResource(uploadDir);
