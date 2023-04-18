@@ -260,6 +260,7 @@ export class OnCallbackQueryHandler {
         );
 
         console.log('ANSWERS', answers);
+
         const poll = await bot.sendPoll(
           query.from.id,
           message(ON_POLL_START, { round }),
