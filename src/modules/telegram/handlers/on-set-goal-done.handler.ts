@@ -70,10 +70,15 @@ export class OnSetGoalDoneHandler {
             const uploadDir = `${config.getUploadFilesPath()}/${
               player.telegramUserId
             }/goals/`;
+            console.log('playerContent', playerContent);
             if (playerContent) {
-              const isExist = await isResourceExist(playerContent.filePath);
-              console.log('isEXIST', isExist);
-              if (isExist) await deleteResource(playerContent.filePath);
+              try {
+                const isExist = await isResourceExist(playerContent.filePath);
+                console.log('isEXIST', isExist);
+                if (isExist) await deleteResource(playerContent.filePath);
+              } catch (e) {
+                console.log('ERROR EXIST', e);
+              }
             } else {
               await createResource(uploadDir);
             }
