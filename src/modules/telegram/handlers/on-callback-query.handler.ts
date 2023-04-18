@@ -242,19 +242,27 @@ export class OnCallbackQueryHandler {
       const batches = arrayBatching(goals, 10);
       let isPinned = false;
       const answers = [];
+      console.log('BATCHES', batches);
       for (let round = 0; round < batches.length; round++) {
         await Promise.all(
           batches[round].map(async (content, index): Promise<void> => {
             const caption = `${++index}. ⚽️ ${content.caption}`;
             answers.push(caption);
-            await bot.sendVideo(query.from.id, content.filePath, {
-              has_spoiler: true,
-              caption: caption,
-              parse_mode: config.getMessageParseMode(),
-            });
+            await bot.sendVideo(
+              query.from.id,
+              `${config.getStaticContentUrl().replace('data', '')}${
+                content.filePath
+              }`,
+              {
+                has_spoiler: true,
+                caption: caption,
+                parse_mode: config.getMessageParseMode(),
+              },
+            );
           }),
         );
 
+        console.log('ANSWERS', answers);
         const poll = await bot.sendPoll(
           query.from.id,
           message(ON_POLL_START, { round }),
