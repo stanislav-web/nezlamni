@@ -37,7 +37,7 @@ export class OnSetGoalDoneHandler {
     playerRepository: PlayerRepository,
     playerContentRepository: PlayerContentRepository,
     logger: Logger,
-  ): Promise<void> {
+  ): Promise<TelegramBot.Message | void> {
     if (!('caption' in msg) && !('video' in msg)) {
       await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
         parse_mode: config.getMessageParseMode(),
@@ -63,6 +63,11 @@ export class OnSetGoalDoneHandler {
               parse_mode: config.getMessageParseMode(),
             });
           } else {
+            if (!('file_id' in msg.video)) {
+              return await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
+                parse_mode: config.getMessageParseMode(),
+              });
+            }
             const playerContent = await playerContentRepository.findOne({
               player,
               type: PlayerContentTypeEnum.GOAL,
@@ -84,7 +89,6 @@ export class OnSetGoalDoneHandler {
             } else if (!playerContent) {
               await createResource(uploadDir);
             }
-
             const uploadedFile = await bot.downloadFile(
               msg.video.file_id,
               uploadDir,
