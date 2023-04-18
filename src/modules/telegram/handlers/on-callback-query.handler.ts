@@ -30,6 +30,7 @@ import {
   ERROR_GAP_MESSAGE,
   ERROR_GET_PLAYERS,
   ERROR_START_GOAL_POLL_NO_GOALS,
+  ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS,
   ERROR_UNREGISTERED,
   ON_POLL_START,
   ON_SET_GOAL_MESSAGE,
@@ -258,9 +259,15 @@ export class OnCallbackQueryHandler {
             });
           }),
         );
-
-        console.log('ANSWERS', answers);
-
+        if (answers.length < 2) {
+          return await bot.sendMessage(
+            query.from.id, // DONT CHANGE
+            message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS),
+            {
+              parse_mode: config.getMessageParseMode(),
+            },
+          );
+        }
         const poll = await bot.sendPoll(
           query.from.id,
           message(ON_POLL_START, { round }),
