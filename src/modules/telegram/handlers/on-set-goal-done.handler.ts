@@ -81,12 +81,8 @@ export class OnSetGoalDoneHandler {
                 playerContent.filePath,
               );
               if (isFilePathExist) await deleteResource(playerContent.filePath);
-            } else if (playerContent) {
-              const isFilePathExist = await isResourceExist(
-                playerContent.filePath,
-              );
-              if (!isFilePathExist) await createResource(uploadDir);
-            } else if (!playerContent) {
+              else await createResource(uploadDir);
+            } else {
               await createResource(uploadDir);
             }
             const uploadedFile = await bot.downloadFile(
