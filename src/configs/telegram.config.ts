@@ -132,7 +132,8 @@ export default registerAs(
      * Get poll open period (sec)
      * @return {boolean}
      */
-    getPollOpenPeriod: (): number => parseInt(getEnv('c', true)),
+    getPollOpenPeriod: (): number =>
+      parseInt(getEnv('TELEGRAM_POLL_OPEN_PERIOD_SEC', true)),
 
     /**
      * Get poll parse mode
