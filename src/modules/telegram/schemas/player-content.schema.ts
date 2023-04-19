@@ -20,19 +20,21 @@ export class PlayerContent {
   @Transform(({ value }) => value.toString())
   _id?: Types.ObjectId;
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Player', required: true })
-  player: Player;
+  player?: Player;
   @Prop({ type: String, enum: PlayerContentTypeEnum, required: true })
-  type: PlayerContentTypeEnum;
+  type?: PlayerContentTypeEnum;
+  @Prop({ type: String, required: false, unique: false })
+  pollId?: string;
   @Prop({ type: Boolean, default: false, required: false })
-  isPolled = false;
+  isPolled?: boolean = false;
   @Prop({ type: Boolean, default: false, required: false })
-  isWinner = false;
+  isWinner?: boolean = false;
   @Prop({ type: String, required: true })
-  caption: string;
+  caption?: string;
   @Prop({ type: String, required: true })
-  fileId: string;
+  fileId?: string;
   @Prop({ type: String, required: true })
-  filePath: string;
+  filePath?: string;
 }
 
 export const PlayerContentSchema = SchemaFactory.createForClass(PlayerContent);

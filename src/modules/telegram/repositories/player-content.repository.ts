@@ -50,12 +50,27 @@ export class PlayerContentRepository {
    * Update player content by Id
    * @param {string} id
    * @param {PlayerContent} content
-   * @return Promise<Player | null>
+   * @return Promise<PlayerContent | null>
    */
-  async update(id: string, content: PlayerContent): Promise<Player | null> {
-    return this.playerContentModel.findByIdAndUpdate(id, content, {
-      new: true,
-    });
+  async update(
+    id: string,
+    content: PlayerContent,
+  ): Promise<PlayerContent | null> {
+    return this.playerContentModel.findByIdAndUpdate(id, content);
+  }
+
+  /**
+   * Update many player content by Ids
+   * @param {string[]} ids
+   * @param {PlayerContent} content
+   * @return Promise<PlayerContent | null>
+   */
+  async updateManyByIds(ids: string[], content: PlayerContent): Promise<any> {
+    return this.playerContentModel.updateMany(
+      { _id: { $in: ids } },
+      { $set: content },
+      { multi: true },
+    );
   }
 
   /**

@@ -4,6 +4,7 @@ import { getBorderCharacters, table } from 'table';
 import {
   arrayBatching,
   findInArrayInsensitive,
+  groupBy,
   isInArray,
   sortAscBy,
 } from '../../../common/utils/array.util';
@@ -29,10 +30,12 @@ import { PlayerContentTypeEnum } from '../enums/player-content-type.enum';
 import {
   ERROR_GAP_MESSAGE,
   ERROR_GET_PLAYERS,
+  ERROR_PERMISSIONS,
   ERROR_START_GOAL_POLL_NO_GOALS,
   ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS,
   ERROR_UNREGISTERED,
-  ON_POLL_START,
+  ON_POLL_FOR_GOAL_PREVIEW,
+  ON_POLL_FOR_GOAL_START,
   ON_SET_GOAL_MESSAGE,
   ON_SET_NATION_MESSAGE,
   ON_SET_NICKNAME_MESSAGE,
@@ -42,6 +45,8 @@ import { PlayerContentRepository } from '../repositories/player-content.reposito
 import { PlayerRepository } from '../repositories/player.repository';
 import { PlayerContent } from '../schemas/player-content.schema';
 import { Player } from '../schemas/player.schema';
+import { PollType } from '../types/poll.type';
+import { SortedPollType } from '../types/sorted-poll.type';
 
 export class OnCallbackQueryHandler {
   /**
@@ -223,70 +228,103 @@ export class OnCallbackQueryHandler {
     query: CallbackQuery,
     config: TelegramConfigType,
   ): Promise<TelegramBot.Message | void> {
-    if (isInArray(config.getGroupModeratorsIds(), query.from.id)) {
-      const goals: PlayerContent[] =
-        await OnCallbackQueryHandler.playerContentRepository.findAll({
-          isPolled: false,
-          type: PlayerContentTypeEnum.GOAL,
-        });
-      const count = goals.length;
-      if (count <= 0) {
-        return await bot.sendMessage(
-          query.from.id,
-          message(ERROR_START_GOAL_POLL_NO_GOALS),
-          {
+    // Check permissions
+    if (false === isInArray(config.getGroupModeratorsIds(), query.from.id)) {
+      return await bot.sendMessage(query.from.id, message(ERROR_PERMISSIONS), {
+        parse_mode: config.getMessageParseMode(),
+      });
+    }
+    const channelId = query.from.id;
+
+    // Retrieve goals for poll
+    const goals: PlayerContent[] =
+      await OnCallbackQueryHandler.playerContentRepository.findAll({
+        isPolled: false,
+        type: PlayerContentTypeEnum.GOAL,
+      });
+    // Check goals for available for poll
+    if (goals.length <= 0) {
+      return await bot.sendMessage(
+        query.from.id,
+        message(ERROR_START_GOAL_POLL_NO_GOALS),
+        {
+          parse_mode: config.getMessageParseMode(),
+        },
+      );
+    }
+
+    const poll = {} as PollType;
+    const pools = [] as PollType[];
+    const batches = arrayBatching(goals, 10);
+
+    // Loop through batches with goals
+    for (let round = 0; round < batches.length; round++) {
+      batches[round].map(async (content, index): Promise<void> => {
+        poll.round = round;
+        poll.contentId = content._id.toString();
+        poll.caption = `${++index}. ⚽️ ${content.caption}`;
+        poll.file = `${config.getStaticContentUrl().replace('data', '')}${
+          content.filePath
+        }`;
+        pools.push(poll);
+      });
+    }
+    if (pools.length < 2) {
+      return await bot.sendMessage(
+        query.from.id,
+        message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS),
+        {
+          parse_mode: config.getMessageParseMode(),
+        },
+      );
+    }
+
+    const startPollMsg = await bot.sendMessage(
+      channelId,
+      message(ON_POLL_FOR_GOAL_PREVIEW),
+      {
+        protect_content: true,
+        parse_mode: config.getMessageParseMode(),
+      },
+    );
+    await bot.pinChatMessage(channelId, startPollMsg.message_id, {
+      disable_notification: false,
+    });
+
+    const content: SortedPollType = groupBy<PollType>(pools, 'round');
+    console.log('POOL FOR VOTING', content);
+    for (const round in content) {
+      const options = content[round].map((item) => item.caption);
+      const contentIds = content[round].map((item) => item.contentId);
+      console.log('OPTIONS', options);
+      console.log('CONTENT IDS', contentIds);
+      await Promise.all(
+        content[round].map(async (content: PollType): Promise<void> => {
+          await bot.sendVideo(channelId, content.file, {
+            has_spoiler: true,
+            caption: content.caption,
             parse_mode: config.getMessageParseMode(),
-          },
-        );
-      }
-
-      const batches = arrayBatching(goals, 10);
-      let isPinned = false;
-      const answers = [];
-      for (let round = 0; round < batches.length; round++) {
-        await Promise.all(
-          batches[round].map(async (content, index): Promise<void> => {
-            const caption = `*${++index}.*   ⚽️ ${content.caption}`;
-            const filePath = `${config
-              .getStaticContentUrl()
-              .replace('data', '')}${content.filePath}`;
-            answers.push(caption);
-            await bot.sendVideo(query.from.id, filePath, {
-              has_spoiler: false,
-              caption: caption,
-              parse_mode: config.getMessageParseMode(),
-            });
-          }),
-        );
-        if (answers.length < 2) {
-          return await bot.sendMessage(
-            query.from.id, // DONT CHANGE
-            message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS),
-            {
-              parse_mode: config.getMessageParseMode(),
-            },
-          );
-        }
-
-        const response = await bot.sendPoll(
-          query.from.id,
-          message(ON_POLL_START, { round: round }),
-          answers,
-          {
-            is_anonymous: false,
-            allows_multiple_answers: false,
-            type: 'regular',
-            open_period: config.getPollOpenPeriod(),
-            explanation_parse_mode: config.getPollParseMode(),
-          },
-        );
-
-        if (!isPinned)
-          await bot.pinChatMessage(query.from.id, response.message_id, {
-            disable_notification: false,
           });
-        isPinned = true;
-      }
+        }),
+      );
+      const result = await bot.sendPoll(
+        channelId,
+        message(ON_POLL_FOR_GOAL_START, { round }),
+        options,
+        {
+          is_anonymous: false,
+          allows_multiple_answers: false,
+          protect_content: true,
+        },
+      );
+
+      await OnCallbackQueryHandler.playerContentRepository.updateManyByIds(
+        contentIds,
+        {
+          pollId: result.poll.id,
+          isPolled: true,
+        },
+      );
     }
   }
 

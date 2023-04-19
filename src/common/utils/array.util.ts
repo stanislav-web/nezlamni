@@ -52,14 +52,28 @@ export const isInArray = (array: string[], str: string | number): boolean =>
 
 /**
  * Split array to chunks
- * @param {any[]} array
+ * @param {any[]} items
  * @param {number} size
  */
-export const arrayBatching = <T>(array: T[], size: number): T[][] => {
+export const arrayBatching = <T>(items: T[], size: number): T[][] => {
   const arr = [];
-  for (let i = 0; i < array.length; i += size) {
-    const chunk = array.slice(i, i + size);
+  for (let i = 0; i < items.length; i += size) {
+    const chunk = items.slice(i, i + size);
     arr.push(chunk);
   }
   return arr;
 };
+
+/**
+ * Group array by
+ * @param {any[]} items
+ * @param {string} key
+ */
+export const groupBy = <T>(items: T[], key: any): { [key: string]: T[] } =>
+  items.reduce(
+    (result, item) => ({
+      ...result,
+      [item[key]]: [...(result[item[key]] || []), item],
+    }),
+    {},
+  );

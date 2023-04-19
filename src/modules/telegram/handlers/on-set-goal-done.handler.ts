@@ -80,7 +80,7 @@ export class OnSetGoalDoneHandler {
             logger.log({ uploadDir });
             logger.log({ video: msg.video });
 
-            if (playerContent) {
+            if (!isEmpty(playerContent) && 'filePath' in playerContent) {
               const isFilePathExist = await isResourceExist(
                 playerContent.filePath,
               );
