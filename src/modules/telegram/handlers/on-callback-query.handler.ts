@@ -236,8 +236,10 @@ export class OnCallbackQueryHandler {
         parse_mode: config.getMessageParseMode(),
       });
     }
-
-    const channelId = config.getNotificationChannel();
+    const chat: TelegramBot.Chat = await bot.getChat(
+      config.getNotificationChannel(),
+    );
+    const channelId = chat.id;
 
     // Retrieve goals for poll
     const goals: PlayerContent[] =
