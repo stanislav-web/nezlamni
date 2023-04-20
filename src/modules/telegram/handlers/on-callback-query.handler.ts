@@ -259,7 +259,6 @@ export class OnCallbackQueryHandler {
 
     const pools = [] as PollType[];
     const batches = arrayBatching(goals, 10);
-    console.log('BATCHES', batches);
     // Loop through batches with goals
     batches.map((batchesItems, round) => {
       const pollRound = ++round;
@@ -300,21 +299,9 @@ export class OnCallbackQueryHandler {
     });
 
     const content: SortedPollType = groupBy<PollType>(pools, 'round');
-    console.log('POOL FOR VOTING', content);
     for (const round in content) {
       const options = content[round].map((item) => item.caption);
       const contentIds = content[round].map((item) => item.contentId);
-      console.log('OPTIONS', options);
-      await Promise.all(
-        content[round].map(async (content: PollType): Promise<void> => {
-          await bot.sendVideo(channelId, content.file, {
-            has_spoiler: true,
-            caption: content.caption,
-            parse_mode: config.getMessageParseMode(),
-          });
-        }),
-      );
-
       if (options.length < 2) {
         return await bot.sendMessage(
           query.from.id,
@@ -324,6 +311,16 @@ export class OnCallbackQueryHandler {
           {
             parse_mode: config.getMessageParseMode(),
           },
+        );
+      } else {
+        await Promise.all(
+          content[round].map(async (content: PollType): Promise<void> => {
+            await bot.sendVideo(channelId, content.file, {
+              has_spoiler: true,
+              caption: content.caption,
+              parse_mode: config.getMessageParseMode(),
+            });
+          }),
         );
       }
       const result = await bot.sendPoll(
