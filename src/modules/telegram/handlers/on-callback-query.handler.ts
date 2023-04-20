@@ -258,9 +258,10 @@ export class OnCallbackQueryHandler {
 
     // Loop through batches with goals
     for (let round = 0; round < batches.length; ++round) {
+      const roundCounter = round;
       batches[round].map((content, index) => {
         const poll = {} as PollType;
-        poll.round = round;
+        poll.round = roundCounter;
         poll.contentId = content._id.toString();
         poll.caption = `${++index}. ⚽️ ${content.caption}`;
         poll.file = `${config.getStaticContentUrl().replace('data', '')}${
@@ -297,7 +298,6 @@ export class OnCallbackQueryHandler {
       const options = content[round].map((item) => item.caption);
       const contentIds = content[round].map((item) => item.contentId);
       console.log('OPTIONS', options);
-      console.log('CONTENT IDS', contentIds);
       await Promise.all(
         content[round].map(async (content: PollType): Promise<void> => {
           await bot.sendVideo(channelId, content.file, {
