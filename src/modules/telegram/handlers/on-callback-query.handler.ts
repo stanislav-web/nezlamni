@@ -45,6 +45,10 @@ import { PlayerContentRepository } from '../repositories/player-content.reposito
 import { PlayerRepository } from '../repositories/player.repository';
 import { PlayerContent } from '../schemas/player-content.schema';
 import { Player } from '../schemas/player.schema';
+import {
+  GOAL_POLL_NO_ROUNDS_TPL,
+  GOAL_POLL_YES_ROUNDS_TPL,
+} from '../templates/poll.template';
 import { PollType } from '../types/poll.type';
 import { SortedPollType } from '../types/sorted-poll.type';
 
@@ -257,23 +261,25 @@ export class OnCallbackQueryHandler {
     const batches = arrayBatching(goals, 10);
 
     // Loop through batches with goals
-    for (let round = 0; round < batches.length; ++round) {
-      const roundCounter = round;
-      batches[round].map((content, index) => {
-        const poll = {} as PollType;
-        poll.round = roundCounter;
-        poll.contentId = content._id.toString();
-        poll.caption = `${++index}. ⚽️ ${content.caption}`;
-        poll.file = `${config.getStaticContentUrl().replace('data', '')}${
-          content.filePath
-        }`;
-        pools.push(poll);
+    batches.map((batchesItems, round) => {
+      batchesItems.map((content, index) => {
+        pools.push({
+          round: ++round,
+          contentId: content._id.toString(),
+          caption: `${++index}. ⚽️ ${content.caption}`,
+          file: `${config.getStaticContentUrl().replace('data', '')}${
+            content.filePath
+          }`,
+        });
       });
-    }
+    });
+
     if (pools.length < 2) {
       return await bot.sendMessage(
         query.from.id,
-        message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS),
+        message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS, {
+          round: GOAL_POLL_NO_ROUNDS_TPL,
+        }),
         {
           parse_mode: config.getMessageParseMode(),
         },
@@ -307,9 +313,24 @@ export class OnCallbackQueryHandler {
           });
         }),
       );
+
+      if (options.length < 2) {
+        return await bot.sendMessage(
+          query.from.id,
+          message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS, {
+            round,
+          }),
+          {
+            parse_mode: config.getMessageParseMode(),
+          },
+        );
+      }
       const result = await bot.sendPoll(
         channelId,
-        message(ON_POLL_FOR_GOAL_START, { round }),
+        message(ON_POLL_FOR_GOAL_START, {
+          round:
+            Object.keys(content).length > 1 ? round : GOAL_POLL_YES_ROUNDS_TPL,
+        }),
         options,
         {
           is_anonymous: false,

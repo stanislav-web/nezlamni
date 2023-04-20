@@ -66,5 +66,5 @@ export const GOAL_COMMAND_PUBLIC = {
 export const GOAL_POLL_COMMAND_PRIVATE = {
   COMMAND: '/goal_poll_moder',
   REGEXP: /\/goal_poll_moder$/,
-  BTN: '📊️ Розпочати голосування за кращий гол',
+  BTN: '📊️ Розпочати голосування ⚽ (модер)',
 };
