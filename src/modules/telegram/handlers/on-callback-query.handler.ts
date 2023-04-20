@@ -47,7 +47,7 @@ import { PlayerContent } from '../schemas/player-content.schema';
 import { Player } from '../schemas/player.schema';
 import {
   GOAL_POLL_NO_ROUNDS_TPL,
-  GOAL_POLL_YES_ROUNDS_TPL,
+  GOAL_POLL_ONE_ROUND_TPL,
 } from '../templates/poll.template';
 import { PollType } from '../types/poll.type';
 import { SortedPollType } from '../types/sorted-poll.type';
@@ -313,21 +313,32 @@ export class OnCallbackQueryHandler {
           },
         );
       } else {
-        await Promise.all(
-          content[round].map(async (content: PollType): Promise<void> => {
-            await bot.sendVideo(channelId, content.file, {
+        content[round].reduce((p, content: PollType) => {
+          return p.then(() => {
+            bot.sendVideo(channelId, content.file, {
               has_spoiler: true,
               caption: content.caption,
               parse_mode: config.getMessageParseMode(),
             });
-          }),
-        );
+          });
+        }, Promise.resolve());
+        // await Promise.all(
+        //   content[round].map(async (content: PollType): Promise<void> => {
+        //     await bot.sendVideo(channelId, content.file, {
+        //       has_spoiler: true,
+        //       caption: content.caption,
+        //       parse_mode: config.getMessageParseMode(),
+        //     });
+        //   }),
+        // );
       }
       const result = await bot.sendPoll(
         channelId,
         message(ON_POLL_FOR_GOAL_START, {
           round:
-            Object.keys(content).length > 1 ? round : GOAL_POLL_YES_ROUNDS_TPL,
+            Object.keys(content).length > 1
+              ? `${round} тур`
+              : GOAL_POLL_ONE_ROUND_TPL,
         }),
         options,
         {
