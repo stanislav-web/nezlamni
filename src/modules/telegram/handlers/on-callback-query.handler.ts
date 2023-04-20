@@ -258,8 +258,8 @@ export class OnCallbackQueryHandler {
     const batches = arrayBatching(goals, 10);
 
     // Loop through batches with goals
-    for (let round = 0; round < batches.length; round++) {
-      batches[round].map(async (content, index): Promise<void> => {
+    for (let round = 0; round < batches.length; ++round) {
+      batches[round].map((content, index) => {
         poll.round = round;
         poll.contentId = content._id.toString();
         poll.caption = `${++index}. ⚽️ ${content.caption}`;
