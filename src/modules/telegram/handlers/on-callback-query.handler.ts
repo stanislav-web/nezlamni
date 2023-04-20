@@ -259,12 +259,13 @@ export class OnCallbackQueryHandler {
 
     const pools = [] as PollType[];
     const batches = arrayBatching(goals, 10);
-
+    console.log('BATCHES', batches);
     // Loop through batches with goals
     batches.map((batchesItems, round) => {
+      const pollRound = ++round;
       batchesItems.map((content, index) => {
         pools.push({
-          round: ++round,
+          round: pollRound,
           contentId: content._id.toString(),
           caption: `${++index}. ⚽️ ${content.caption}`,
           file: `${config.getStaticContentUrl().replace('data', '')}${
