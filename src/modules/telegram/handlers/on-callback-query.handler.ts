@@ -41,14 +41,12 @@ import {
   ON_SET_NICKNAME_MESSAGE,
   PLAYERS_LIST_MESSAGE,
 } from '../messages';
+import { ERROR_CONTINUE_GOAL_POLL_NOT_ENOUGH_GOALS } from '../messages/errors.message';
 import { PlayerContentRepository } from '../repositories/player-content.repository';
 import { PlayerRepository } from '../repositories/player.repository';
 import { PlayerContent } from '../schemas/player-content.schema';
 import { Player } from '../schemas/player.schema';
-import {
-  GOAL_POLL_NO_ROUNDS_TPL,
-  GOAL_POLL_ONE_ROUND_TPL,
-} from '../templates/poll.template';
+import { GOAL_POLL_ONE_ROUND_TPL } from '../templates/poll.template';
 import { PollType } from '../types/poll.type';
 import { SortedPollType } from '../types/sorted-poll.type';
 
@@ -277,9 +275,7 @@ export class OnCallbackQueryHandler {
     if (pools.length < 2) {
       return await bot.sendMessage(
         query.from.id,
-        message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS, {
-          round: GOAL_POLL_NO_ROUNDS_TPL,
-        }),
+        message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS),
         {
           parse_mode: config.getMessageParseMode(),
         },
@@ -304,8 +300,8 @@ export class OnCallbackQueryHandler {
       const contentIds = content[round].map((item) => item.contentId);
       if (options.length < 2) {
         return await bot.sendMessage(
-          query.from.id,
-          message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS, {
+          channelId,
+          message(ERROR_CONTINUE_GOAL_POLL_NOT_ENOUGH_GOALS, {
             round,
           }),
           {
@@ -313,13 +309,11 @@ export class OnCallbackQueryHandler {
           },
         );
       } else {
-        content[round].reduce((p, content: PollType) => {
-          return p.then(() => {
-            bot.sendVideo(channelId, content.file, {
-              has_spoiler: true,
-              caption: content.caption,
-              parse_mode: config.getMessageParseMode(),
-            });
+        await content[round].reduce(async (p, content: PollType) => {
+          await bot.sendVideo(channelId, content.file, {
+            has_spoiler: true,
+            caption: content.caption,
+            parse_mode: config.getMessageParseMode(),
           });
         }, Promise.resolve());
         // await Promise.all(
