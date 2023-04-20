@@ -236,7 +236,8 @@ export class OnCallbackQueryHandler {
         parse_mode: config.getMessageParseMode(),
       });
     }
-    const channelId = query.from.id;
+
+    const channelId = config.getNotificationChannel();
 
     // Retrieve goals for poll
     const goals: PlayerContent[] =
