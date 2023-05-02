@@ -37,6 +37,7 @@ export class OnSetNationDoneHandler {
   ): Promise<void> {
     if (!('text' in msg)) {
       await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     } else {
@@ -47,6 +48,7 @@ export class OnSetNationDoneHandler {
         });
         if (isEmpty(player)) {
           await bot.sendMessage(msg.chat.id, message(ERROR_NOT_REGISTERED), {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           });
         } else {
@@ -59,6 +61,7 @@ export class OnSetNationDoneHandler {
               msg.chat.id,
               message(ERROR_SET_NATION_FORMAT),
               {
+                message_thread_id: msg?.message_thread_id || undefined,
                 parse_mode: config.getMessageParseMode(),
               },
             );
@@ -78,6 +81,7 @@ export class OnSetNationDoneHandler {
                   username: player.telegramFirstName,
                 }),
                 {
+                  message_thread_id: msg?.message_thread_id || undefined,
                   parse_mode: config.getMessageParseMode(),
                 },
               );
@@ -92,9 +96,10 @@ export class OnSetNationDoneHandler {
                 msg.chat.id,
                 message(ON_SET_NATION_DONE_MESSAGE, {
                   country: country.name,
-                  scheduleLink: config.getChannelGamesScheduleLink(),
+                  scheduleLink: `${config.getStaticContentUrl()}/examples/schedule.png`,
                 }),
                 {
+                  message_thread_id: msg?.message_thread_id || undefined,
                   disable_web_page_preview: true,
                   parse_mode: config.getMessageParseMode(),
                 },
@@ -105,6 +110,7 @@ export class OnSetNationDoneHandler {
       } catch (error) {
         logger.error(error);
         await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+          message_thread_id: msg?.message_thread_id || undefined,
           parse_mode: config.getMessageParseMode(),
         });
       }

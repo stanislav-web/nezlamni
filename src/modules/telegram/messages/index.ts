@@ -17,7 +17,12 @@ import {
   ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS,
 } from './errors.message';
 import { INVITE_LINK_MESSAGE } from './invite-link.message';
-import { ON_MEMBER_LEFT } from './on-member-left.message';
+import { ON_GET_RULES_MESSAGE } from './on-get-rules.message';
+import { ON_INVITE_GROUP_MESSAGE } from './on-invite-group.message';
+import {
+  ON_MEMBER_LEFT,
+  ON_MEMBER_LEFT_NATION_AVAILABLE,
+} from './on-member-left.message';
 import { ON_NEW_MEMBER } from './on-new-member.message';
 import {
   ON_POLL_FOR_GOAL_PREVIEW,
@@ -41,6 +46,8 @@ export {
   ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS,
   ON_POLL_FOR_GOAL_PREVIEW,
   ERROR_PERMISSIONS,
+  ON_INVITE_GROUP_MESSAGE,
+  ON_MEMBER_LEFT_NATION_AVAILABLE,
   ERROR_SET_NATION_CONFLICT,
   ERROR_SET_NATION_FORMAT,
   ERROR_NOT_REGISTERED,
@@ -58,6 +65,7 @@ export {
   ON_NEW_MEMBER,
   ON_SET_NICKNAME_DONE_MESSAGE,
   ON_MEMBER_LEFT,
+  ON_GET_RULES_MESSAGE,
   INVITE_LINK_MESSAGE,
   ON_SET_NICKNAME_MESSAGE,
   ERROR_GAP_MESSAGE,

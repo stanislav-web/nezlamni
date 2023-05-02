@@ -21,14 +21,16 @@ export class OnGetChannelScheduleHandler {
     try {
       await bot.sendMessage(
         msg.chat.id,
-        message(`${config.getChannelGamesScheduleLink()}`),
+        message(`${config.getStaticContentUrl()}/examples/schedule.png`),
         {
+          message_thread_id: msg?.message_thread_id || undefined,
           parse_mode: config.getMessageParseMode(),
         },
       );
     } catch (error) {
       logger.error(error);
       await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     }

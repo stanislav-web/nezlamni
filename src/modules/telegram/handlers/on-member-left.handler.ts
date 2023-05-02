@@ -1,9 +1,18 @@
 import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
+import { findInArrayInsensitive } from '../../../common/utils/array.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { isEmpty } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
-import { ERROR_GAP_MESSAGE, ON_MEMBER_LEFT } from '../messages';
+import {
+  countries,
+  CountryListItemType,
+} from '../../../data/country-list.data';
+import {
+  ERROR_GAP_MESSAGE,
+  ON_MEMBER_LEFT,
+  ON_MEMBER_LEFT_NATION_AVAILABLE,
+} from '../messages';
 import { PlayerRepository } from '../repositories/player.repository';
 
 export class OnMemberLeftHandler {
@@ -30,15 +39,39 @@ export class OnMemberLeftHandler {
         await playerRepository.findOneAndRemove({
           telegramUserId: msg.left_chat_member.id,
         });
-        await bot.sendMessage(
-          msg.chat.id,
-          message(ON_MEMBER_LEFT, {
-            username: msg.left_chat_member.first_name,
-          }),
-          {
-            parse_mode: config.getMessageParseMode(),
-          },
-        );
+
+        if (!isEmpty(player?.playerNation)) {
+          const country = findInArrayInsensitive(
+            countries,
+            'code',
+            player.playerNation,
+          ) as CountryListItemType;
+          const nation = !isEmpty(country)
+            ? country?.flag
+            : player.playerNation;
+          await bot.sendMessage(
+            msg.chat.id,
+            message(ON_MEMBER_LEFT_NATION_AVAILABLE, {
+              username: msg.left_chat_member.first_name,
+              nation,
+            }),
+            {
+              message_thread_id: msg?.message_thread_id || undefined,
+              parse_mode: config.getMessageParseMode(),
+            },
+          );
+        } else {
+          await bot.sendMessage(
+            msg.chat.id,
+            message(ON_MEMBER_LEFT, {
+              username: msg.left_chat_member.first_name,
+            }),
+            {
+              message_thread_id: msg?.message_thread_id || undefined,
+              parse_mode: config.getMessageParseMode(),
+            },
+          );
+        }
       }
     } catch (error) {
       logger.error(error);
@@ -47,6 +80,7 @@ export class OnMemberLeftHandler {
         error?.response?.body?.ok !== false
       ) {
         await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+          message_thread_id: msg?.message_thread_id || undefined,
           parse_mode: config.getMessageParseMode(),
         });
       }

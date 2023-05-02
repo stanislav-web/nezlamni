@@ -62,9 +62,32 @@ export const GOAL_COMMAND_PUBLIC = {
   REGEXP: /\/goal@NezlamniFifaBot$/,
   BTN: '⚽️ Відправити гол',
 };
+export const INVITE_GROUP_PUBLIC = {
+  COMMAND: '/invite_player@NezlamniFifaBot',
+  REGEXP: /\/invite_player@NezlamniFifaBot$/,
+  BTN: '🤝️ Запросити гравця',
+};
+
+export const INVITE_GROUP_PRIVATE = {
+  COMMAND: '/invite_player',
+  REGEXP: /\/invite_player$/,
+  BTN: '🤝️ Запросити гравця',
+};
 
 export const GOAL_POLL_COMMAND_PRIVATE = {
   COMMAND: '/goal_poll_moder',
   REGEXP: /\/goal_poll_moder$/,
   BTN: '📊️ Розпочати голосування ⚽ (модер)',
+};
+
+export const RULES_GROUP_PRIVATE = {
+  COMMAND: '/rules',
+  REGEXP: /\/rules$/,
+  BTN: '👮‍ Правила',
+};
+
+export const RULES_GROUP_PUBLIC = {
+  COMMAND: '/rules@NezlamniFifaBot',
+  REGEXP: /\/rules@NezlamniFifaBot$/,
+  BTN: '👮‍ Правила',
 };

@@ -40,16 +40,18 @@ export class OnSetGoalDoneHandler {
   ): Promise<TelegramBot.Message | void> {
     if (!('caption' in msg) && !('video' in msg)) {
       await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     } else {
-      const regex = /^(ЧС|ЛЧ|ЛЄ|ЛК|УПЛ|ПУЛ|ДУЛ),+.(.*)$/;
+      const regex = /^(ЧС|СК|ЛЧ|ЛЄ|ЛК|УПЛ|ПУЛ|ДУЛ),+.(.*)$/;
       const caption = msg.caption.trim();
       if (!regex.test(caption)) {
         await bot.sendMessage(
           msg.chat.id,
           message(ERROR_SET_GOAL_CAPTION_FORMAT),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
@@ -60,11 +62,13 @@ export class OnSetGoalDoneHandler {
           });
           if (isEmpty(player)) {
             await bot.sendMessage(msg.chat.id, message(ERROR_NOT_REGISTERED), {
+              message_thread_id: msg?.message_thread_id || undefined,
               parse_mode: config.getMessageParseMode(),
             });
           } else {
             if (!('file_id' in msg.video)) {
               return await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
+                message_thread_id: msg?.message_thread_id || undefined,
                 parse_mode: config.getMessageParseMode(),
               });
             }
@@ -106,10 +110,11 @@ export class OnSetGoalDoneHandler {
             await bot.sendMessage(
               msg.chat.id,
               message(ON_SET_GOAL_DONE_MESSAGE, {
-                scheduleLink: config.getChannelGamesScheduleLink(),
+                scheduleLink: `${config.getStaticContentUrl()}/examples/schedule.png`,
               }),
               {
                 disable_web_page_preview: true,
+                message_thread_id: msg?.message_thread_id || undefined,
                 parse_mode: config.getMessageParseMode(),
               },
             );
@@ -117,6 +122,7 @@ export class OnSetGoalDoneHandler {
         } catch (error) {
           logger.error(error);
           await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           });
         }

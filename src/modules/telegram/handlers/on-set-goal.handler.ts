@@ -34,6 +34,7 @@ export class OnSetGoalHandler {
             botId: config.getBotId(),
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
@@ -45,6 +46,7 @@ export class OnSetGoalHandler {
             limit: gameplayConf.getGameplayGoalsUploadLimit(),
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
@@ -52,6 +54,7 @@ export class OnSetGoalHandler {
     } catch (error) {
       logger.error(error);
       await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     }

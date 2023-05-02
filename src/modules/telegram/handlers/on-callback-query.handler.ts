@@ -21,10 +21,14 @@ import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
   GOAL_COMMAND_PRIVATE,
   GOAL_POLL_COMMAND_PRIVATE,
+  INVITE_GROUP_PRIVATE,
+  INVITE_GROUP_PUBLIC,
   NATION_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
+  RULES_GROUP_PRIVATE,
+  RULES_GROUP_PUBLIC,
 } from '../commands';
 import { PlayerContentTypeEnum } from '../enums/player-content-type.enum';
 import {
@@ -34,6 +38,8 @@ import {
   ERROR_START_GOAL_POLL_NO_GOALS,
   ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS,
   ERROR_UNREGISTERED,
+  ON_GET_RULES_MESSAGE,
+  ON_INVITE_GROUP_MESSAGE,
   ON_POLL_FOR_GOAL_PREVIEW,
   ON_POLL_FOR_GOAL_START,
   ON_SET_GOAL_MESSAGE,
@@ -100,6 +106,7 @@ export class OnCallbackQueryHandler {
             channelLink: chat.invite_link,
           }),
           {
+            message_thread_id: query.message?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
@@ -147,6 +154,19 @@ export class OnCallbackQueryHandler {
             config,
           );
           break;
+
+        case INVITE_GROUP_PRIVATE.COMMAND || INVITE_GROUP_PUBLIC.COMMAND:
+          await OnCallbackQueryHandler.getInviteMessageQueryHandler(
+            bot,
+            query,
+            config,
+          );
+          break;
+
+        case RULES_GROUP_PRIVATE.COMMAND || RULES_GROUP_PUBLIC.COMMAND:
+          await OnCallbackQueryHandler.getRulesQueryHandler(bot, query, config);
+          break;
+
         default:
           break;
       }
@@ -154,6 +174,7 @@ export class OnCallbackQueryHandler {
       logger.error(error);
       await bot.sendMessage(query.from.id, message(ERROR_GAP_MESSAGE), {
         parse_mode: config.getMessageParseMode(),
+        message_thread_id: query.message?.message_thread_id || undefined,
       });
     }
   }
@@ -172,6 +193,7 @@ export class OnCallbackQueryHandler {
   ): Promise<TelegramBot.Message | void> {
     return bot.sendMessage(query.from.id, message(ON_SET_NICKNAME_MESSAGE), {
       parse_mode: config.getMessageParseMode(),
+      message_thread_id: query.message?.message_thread_id || undefined,
     });
   }
 
@@ -189,6 +211,7 @@ export class OnCallbackQueryHandler {
   ): Promise<TelegramBot.Message | void> {
     return bot.sendMessage(query.from.id, message(ON_SET_NATION_MESSAGE), {
       parse_mode: config.getMessageParseMode(),
+      message_thread_id: query.message?.message_thread_id || undefined,
     });
   }
 
@@ -213,6 +236,7 @@ export class OnCallbackQueryHandler {
         limit: gameplayConf.getGameplayGoalsUploadLimit(),
       }),
       {
+        message_thread_id: query.message?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       },
     );
@@ -234,12 +258,14 @@ export class OnCallbackQueryHandler {
     if (false === isInArray(config.getGroupModeratorsIds(), query.from.id)) {
       return await bot.sendMessage(query.from.id, message(ERROR_PERMISSIONS), {
         parse_mode: config.getMessageParseMode(),
+        message_thread_id: query?.message.message_thread_id || undefined,
       });
     }
     const chat: TelegramBot.Chat = await bot.getChat(
       config.getNotificationChannel(),
     );
     const channelId = chat.id;
+    const channelThreadId = 1;
 
     // Retrieve goals for poll
     const goals: PlayerContent[] =
@@ -254,6 +280,7 @@ export class OnCallbackQueryHandler {
         message(ERROR_START_GOAL_POLL_NO_GOALS),
         {
           parse_mode: config.getMessageParseMode(),
+          message_thread_id: query.message?.message_thread_id || undefined,
         },
       );
     }
@@ -280,6 +307,7 @@ export class OnCallbackQueryHandler {
         query.from.id,
         message(ERROR_START_GOAL_POLL_NOT_ENOUGH_GOALS),
         {
+          message_thread_id: query.message?.message_thread_id || undefined,
           parse_mode: config.getMessageParseMode(),
         },
       );
@@ -290,6 +318,7 @@ export class OnCallbackQueryHandler {
       message(ON_POLL_FOR_GOAL_PREVIEW),
       {
         protect_content: true,
+        message_thread_id: channelThreadId,
         parse_mode: config.getMessageParseMode(),
       },
     );
@@ -308,6 +337,7 @@ export class OnCallbackQueryHandler {
             round,
           }),
           {
+            message_thread_id: channelThreadId,
             parse_mode: config.getMessageParseMode(),
           },
         );
@@ -316,18 +346,10 @@ export class OnCallbackQueryHandler {
           await bot.sendVideo(channelId, content.file, {
             has_spoiler: true,
             caption: content.caption,
+            message_thread_id: channelThreadId,
             parse_mode: config.getMessageParseMode(),
           });
         }, Promise.resolve());
-        // await Promise.all(
-        //   content[round].map(async (content: PollType): Promise<void> => {
-        //     await bot.sendVideo(channelId, content.file, {
-        //       has_spoiler: true,
-        //       caption: content.caption,
-        //       parse_mode: config.getMessageParseMode(),
-        //     });
-        //   }),
-        // );
       }
       const result = await bot.sendPoll(
         channelId,
@@ -340,6 +362,7 @@ export class OnCallbackQueryHandler {
         options,
         {
           is_anonymous: false,
+          message_thread_id: channelThreadId,
           allows_multiple_answers: false,
           protect_content: true,
         },
@@ -372,6 +395,7 @@ export class OnCallbackQueryHandler {
     if (!players)
       await bot.sendMessage(query.from.id, message(ERROR_GET_PLAYERS), {
         parse_mode: config.getMessageParseMode(),
+        message_thread_id: query.message?.message_thread_id || undefined,
       });
     else {
       const pls = sortAscBy(players, 'telegramFirstName');
@@ -406,6 +430,7 @@ export class OnCallbackQueryHandler {
           }),
         }),
         {
+          message_thread_id: query.message?.message_thread_id || undefined,
           parse_mode: config.getMessageParseMode(),
         },
       );
@@ -426,8 +451,55 @@ export class OnCallbackQueryHandler {
   ): Promise<TelegramBot.Message | void> {
     await bot.sendMessage(
       query.from.id,
-      message(`${config.getChannelGamesScheduleLink()}`),
+      message(`${config.getStaticContentUrl()}/examples/schedule.png`),
       {
+        message_thread_id: query.message?.message_thread_id || undefined,
+        parse_mode: config.getMessageParseMode(),
+      },
+    );
+  }
+
+  /**
+   * Get rules callback query handler
+   * @param {TelegramBot} bot
+   * @param {CallbackQuery} query
+   * @param {TelegramConfigType} config
+   * @return Promise<TelegramBot.Message | void>
+   */
+  private static async getRulesQueryHandler(
+    bot: TelegramBot,
+    query: CallbackQuery,
+    config: TelegramConfigType,
+  ): Promise<TelegramBot.Message | void> {
+    await bot.sendMessage(query.from.id, message(ON_GET_RULES_MESSAGE), {
+      message_thread_id: query.message?.message_thread_id || undefined,
+      parse_mode: config.getMessageParseMode(),
+    });
+  }
+
+  /**
+   * Get rules callback query handler
+   * @param {TelegramBot} bot
+   * @param {CallbackQuery} query
+   * @param {TelegramConfigType} config
+   * @return Promise<TelegramBot.Message | void>
+   */
+  private static async getInviteMessageQueryHandler(
+    bot: TelegramBot,
+    query: CallbackQuery,
+    config: TelegramConfigType,
+  ): Promise<TelegramBot.Message | void> {
+    const chat: TelegramBot.Chat = await bot.getChat(
+      config.getNotificationChannel(),
+    );
+
+    await bot.sendMessage(
+      query.from.id,
+      message(ON_INVITE_GROUP_MESSAGE, {
+        channelLink: chat.invite_link,
+      }),
+      {
+        message_thread_id: query.message?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       },
     );

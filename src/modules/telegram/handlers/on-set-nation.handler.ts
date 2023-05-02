@@ -31,17 +31,20 @@ export class OnSetNationHandler {
             botId: config.getBotId(),
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
       } else {
         await bot.sendMessage(msg.chat.id, message(ON_SET_NATION_MESSAGE), {
+          message_thread_id: msg?.message_thread_id || undefined,
           parse_mode: config.getMessageParseMode(),
         });
       }
     } catch (error) {
       logger.error(error);
       await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     }

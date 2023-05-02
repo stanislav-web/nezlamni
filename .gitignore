@@ -10,9 +10,6 @@
 .env.stage
 .env.production
 
-# Data
-/data/players
-
 # Modules
 dist
 node_modules

@@ -36,13 +36,6 @@ export default registerAs(
     getToken: (): string => getEnv('TELEGRAM_TOKEN', true),
 
     /**
-     * Get channel games schedule link
-     * @return {string}
-     */
-    getChannelGamesScheduleLink: (): string =>
-      getEnv('TELEGRAM_CHANNEL_GAMES_SCHEDULE_LINK', true),
-
-    /**
      * Get channel games champions link
      * @return {string}
      */

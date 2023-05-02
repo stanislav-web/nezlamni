@@ -9,20 +9,26 @@ import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
   GOAL_COMMAND_PRIVATE,
   GOAL_COMMAND_PUBLIC,
+  INVITE_GROUP_PRIVATE,
+  INVITE_GROUP_PUBLIC,
   NATION_COMMAND_PRIVATE,
   NATION_COMMAND_PUBLIC,
   NICKNAME_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PUBLIC,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
+  RULES_GROUP_PRIVATE,
+  RULES_GROUP_PUBLIC,
   START_COMMAND,
 } from '../commands';
 import { TelegramChatTypeEnum } from '../enums/telegram-chat-type.enum';
 import {
   OnCallbackQueryHandler,
   OnGetPlayersHandler,
+  OnInviteGroupHandler,
   OnMemberLeftHandler,
   OnNewMemberHandler,
+  OnRulesHandler,
   OnSetGoalDoneHandler,
   OnSetGoalHandler,
   OnSetNationDoneHandler,
@@ -162,6 +168,19 @@ export class NezlamniBotService {
       CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.REGEXP,
       this.onChannelGameSchedule,
     );
+
+    NezlamniBotService.bot.onText(
+      INVITE_GROUP_PUBLIC.REGEXP,
+      this.onInviteGroup,
+    );
+    NezlamniBotService.bot.onText(
+      INVITE_GROUP_PRIVATE.REGEXP,
+      this.onInviteGroup,
+    );
+
+    NezlamniBotService.bot.onText(RULES_GROUP_PUBLIC.REGEXP, this.onRules);
+    NezlamniBotService.bot.onText(RULES_GROUP_PRIVATE.REGEXP, this.onRules);
+
     NezlamniBotService.bot.on('new_chat_members', this.onNewMember);
     NezlamniBotService.bot.on('left_chat_member', this.onMemberLeft);
     NezlamniBotService.bot.on('message', this.onMessage);
@@ -235,6 +254,48 @@ export class NezlamniBotService {
       NezlamniBotService.logger.debug(`onChannelGameSchedule event`);
       NezlamniBotService.logger.log(msg);
       await OnGetChannelScheduleHandler.init(
+        NezlamniBotService.bot,
+        msg,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
+      );
+    }
+  }
+
+  /**
+   * onInviteGroup event /invite_player
+   * @param {Message} msg
+   */
+  async onInviteGroup(msg: Message): Promise<void> {
+    if (
+      !msg.from.is_bot &&
+      (msg.text === INVITE_GROUP_PRIVATE.COMMAND ||
+        msg.text === INVITE_GROUP_PUBLIC.COMMAND)
+    ) {
+      NezlamniBotService.logger.debug(`onInviteGroup event`);
+      NezlamniBotService.logger.log(msg);
+      await OnInviteGroupHandler.init(
+        NezlamniBotService.bot,
+        msg,
+        NezlamniBotService.config,
+        NezlamniBotService.logger,
+      );
+    }
+  }
+
+  /**
+   * onRules event /rules
+   * @param {Message} msg
+   */
+  async onRules(msg: Message): Promise<void> {
+    if (
+      !msg.from.is_bot &&
+      (msg.text === RULES_GROUP_PRIVATE.COMMAND ||
+        msg.text === RULES_GROUP_PUBLIC.COMMAND)
+    ) {
+      NezlamniBotService.logger.debug(`onRules event`);
+      NezlamniBotService.logger.log(msg);
+      await OnRulesHandler.init(
         NezlamniBotService.bot,
         msg,
         NezlamniBotService.config,

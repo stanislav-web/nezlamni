@@ -42,6 +42,7 @@ export class OnGetPlayersHandler {
       if (!players)
         await bot.sendMessage(msg.chat.id, message(ERROR_GET_PLAYERS), {
           parse_mode: config.getMessageParseMode(),
+          message_thread_id: msg?.message_thread_id || undefined,
         });
       else {
         const pls = sortAscBy(players, 'telegramFirstName');
@@ -79,6 +80,7 @@ export class OnGetPlayersHandler {
             }),
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
@@ -86,6 +88,7 @@ export class OnGetPlayersHandler {
     } catch (error) {
       logger.error(error);
       await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     }

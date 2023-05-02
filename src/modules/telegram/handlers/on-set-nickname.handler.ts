@@ -6,6 +6,7 @@ import { TelegramChatTypeEnum } from '../enums/telegram-chat-type.enum';
 import {
   ERROR_GAP_MESSAGE,
   ERROR_SET_NICKNAME,
+  ERROR_UNREGISTERED,
   ON_SET_NICKNAME_MESSAGE,
 } from '../messages';
 
@@ -32,17 +33,40 @@ export class OnSetNicknameHandler {
             botId: config.getBotId(),
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
       } else {
-        await bot.sendMessage(msg.chat.id, message(ON_SET_NICKNAME_MESSAGE), {
-          parse_mode: config.getMessageParseMode(),
-        });
+        const member = await bot.getChatMember(
+          config.getNotificationChannel(),
+          msg.from.id,
+        );
+        if (!member) {
+          const chat: TelegramBot.Chat = await bot.getChat(
+            config.getNotificationChannel(),
+          );
+          await bot.sendMessage(
+            msg.chat.id,
+            message(ERROR_UNREGISTERED, {
+              channelName: chat.title,
+              channelLink: chat.invite_link,
+            }),
+            {
+              message_thread_id: msg?.message_thread_id || undefined,
+              parse_mode: config.getMessageParseMode(),
+            },
+          );
+        } else
+          await bot.sendMessage(msg.chat.id, message(ON_SET_NICKNAME_MESSAGE), {
+            message_thread_id: msg?.message_thread_id || undefined,
+            parse_mode: config.getMessageParseMode(),
+          });
       }
     } catch (error) {
       logger.error(error);
       await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     }

@@ -43,12 +43,14 @@ export class OnSetNicknameDoneHandler {
             channelLink: chat.invite_link,
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
       }
       if (!('text' in msg)) {
         await bot.sendMessage(msg.chat.id, message(ERROR_EMPTY), {
+          message_thread_id: msg?.message_thread_id || undefined,
           parse_mode: config.getMessageParseMode(),
         });
       } else {
@@ -77,6 +79,7 @@ export class OnSetNicknameDoneHandler {
             username: msg.from.first_name,
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );
@@ -84,6 +87,7 @@ export class OnSetNicknameDoneHandler {
     } catch (error) {
       logger.error(error);
       await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     }

@@ -8,10 +8,13 @@ import {
   CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PUBLIC,
   GOAL_COMMAND_PRIVATE,
   GOAL_POLL_COMMAND_PRIVATE,
+  INVITE_GROUP_PRIVATE,
   NATION_COMMAND_PRIVATE,
   NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
+  RULES_GROUP_PRIVATE,
+  RULES_GROUP_PUBLIC,
 } from '../commands';
 import { TelegramChatTypeEnum } from '../enums/telegram-chat-type.enum';
 import {
@@ -72,6 +75,18 @@ export class OnStartHandler {
                 CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND,
             },
           ],
+          [
+            {
+              text: INVITE_GROUP_PRIVATE.BTN,
+              callback_data: INVITE_GROUP_PRIVATE.COMMAND,
+            },
+          ],
+          [
+            {
+              text: RULES_GROUP_PRIVATE.BTN,
+              callback_data: RULES_GROUP_PRIVATE.COMMAND,
+            },
+          ],
         ];
 
         if (isInArray(config.getGroupModeratorsIds(), msg.from.id))
@@ -89,6 +104,7 @@ export class OnStartHandler {
             username: msg.from.first_name,
           }),
           {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
             reply_markup: {
               resize_keyboard: true,
@@ -106,11 +122,13 @@ export class OnStartHandler {
               channelLink: chat.invite_link,
             }),
             {
+              message_thread_id: msg?.message_thread_id || undefined,
               parse_mode: config.getMessageParseMode(),
             },
           );
         } else {
           await bot.sendMessage(msg.chat.id, message(ON_START_PUBLIC_MESSAGE), {
+            message_thread_id: msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
             reply_markup: {
               resize_keyboard: true,
@@ -129,6 +147,12 @@ export class OnStartHandler {
                       CHANNEL_GAMES_SCHEDULE_LINK_COMMAND_PRIVATE.COMMAND,
                   },
                 ],
+                [
+                  {
+                    text: RULES_GROUP_PUBLIC.BTN,
+                    callback_data: RULES_GROUP_PUBLIC.COMMAND,
+                  },
+                ],
               ],
             },
           });
@@ -137,6 +161,7 @@ export class OnStartHandler {
     } catch (error) {
       logger.error(error);
       await bot.sendMessage(msg.chat.id, message(ERROR_GAP_MESSAGE), {
+        message_thread_id: msg?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
       });
     }

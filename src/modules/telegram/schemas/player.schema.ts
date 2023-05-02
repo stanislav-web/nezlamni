@@ -41,6 +41,7 @@ export class Player {
 
   @Prop({
     required: false,
+    unique: true,
     type: String,
     set: (playerNation: string) => {
       return playerNation.trim();

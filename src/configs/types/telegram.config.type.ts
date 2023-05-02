@@ -1,5 +1,4 @@
 import { ParseMode } from 'node-telegram-bot-api';
-import { getEnv } from '../../common/utils/get-env.variable.util';
 
 export type TelegramConfigType = {
   /**
@@ -17,12 +16,6 @@ export type TelegramConfigType = {
    * @return {string}
    */
   getChannelGamesChampionsLink(): string;
-
-  /**
-   * Get channel games schedule link
-   * @return {string}
-   */
-  getChannelGamesScheduleLink(): string;
 
   /**
    * Get group admin id
