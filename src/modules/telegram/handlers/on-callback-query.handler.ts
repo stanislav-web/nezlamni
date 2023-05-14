@@ -265,7 +265,7 @@ export class OnCallbackQueryHandler {
       config.getNotificationChannel(),
     );
     const channelId = chat.id;
-    const channelThreadId = config.getChatThreadId();
+    const channelThreadId = query?.message.message_thread_id;
 
     // Retrieve goals for poll
     const goals: PlayerContent[] =
