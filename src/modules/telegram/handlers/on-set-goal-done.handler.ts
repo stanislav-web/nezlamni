@@ -104,7 +104,7 @@ export class OnSetGoalDoneHandler {
               type: PlayerContentTypeEnum.GOAL,
               caption,
               fileId: msg.video.file_id,
-              filePath: uploadedFile,
+              filePath: uploadedFile.toLowerCase(),
             });
 
             await bot.sendMessage(
