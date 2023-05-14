@@ -122,14 +122,21 @@ export default registerAs(
       getEnv('TELEGRAM_UPLOAD_FILES_PATH', true),
 
     /**
-     * Get group admin id
+     * Get telegram main thread Id
      * @return {number | undefined}
      */
     getMainThreadId: (): number | undefined =>
       parseInt(getEnv('TELEGRAM_MAIN_THREAD_ID', false)) || undefined,
 
     /**
-     * Get group admin id
+     * Get telegram goals thread Id
+     * @return {number | undefined}
+     */
+    getGoalsThreadId: (): number | undefined =>
+      parseInt(getEnv('TELEGRAM_GOALS_THREAD_ID', false)) || undefined,
+
+    /**
+     * Get telegram chat thread Id
      * @return {number | undefined}
      */
     getChatThreadId: (): number | undefined =>

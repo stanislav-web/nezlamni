@@ -18,10 +18,16 @@ export type TelegramConfigType = {
   getChannelGamesChampionsLink(): string;
 
   /**
-   * Gt telegram chat thread Id
+   * Get telegram chat thread Id
    * @return {number| undefined}
    */
   getChatThreadId(): number | undefined;
+
+  /**
+   * Get telegram goals thread Id
+   * @return {number | undefined}
+   */
+  getGoalsThreadId(): number | undefined;
 
   /**
    * Get group admin id
@@ -34,14 +40,14 @@ export type TelegramConfigType = {
    * @return {string}
    */
   getGroupAdminName(): string;
-
   /**
    * Get group moderators ids
    * @return string[]
    */
   getGroupModeratorsIds(): string[];
+
   /**
-   * Gt telegram main thread Id
+   * Get telegram main thread Id
    * @return {number | undefined}
    */
   getMainThreadId(): number | undefined;
