@@ -48,7 +48,8 @@ export class OnNewMemberHandler {
             botId: config.getBotId(),
           }),
           {
-            message_thread_id: msg?.message_thread_id || undefined,
+            message_thread_id:
+              config.getChatThreadId() || msg?.message_thread_id || undefined,
             parse_mode: config.getMessageParseMode(),
           },
         );

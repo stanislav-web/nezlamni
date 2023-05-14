@@ -18,6 +18,12 @@ export type TelegramConfigType = {
   getChannelGamesChampionsLink(): string;
 
   /**
+   * Gt telegram chat thread Id
+   * @return {number| undefined}
+   */
+  getChatThreadId(): number | undefined;
+
+  /**
    * Get group admin id
    * @return {number}
    */
@@ -34,12 +40,18 @@ export type TelegramConfigType = {
    * @return string[]
    */
   getGroupModeratorsIds(): string[];
+  /**
+   * Gt telegram main thread Id
+   * @return {number | undefined}
+   */
+  getMainThreadId(): number | undefined;
 
   /**
    * Get maximum allowed connections
    * @return number
    */
   getMaxAllowedConnections(): number;
+
   /**
    * Get messages parse mode
    * @return {ParseMode}

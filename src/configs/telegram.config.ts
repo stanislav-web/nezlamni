@@ -120,5 +120,19 @@ export default registerAs(
      */
     getUploadFilesPath: (): string =>
       getEnv('TELEGRAM_UPLOAD_FILES_PATH', true),
+
+    /**
+     * Get group admin id
+     * @return {number | undefined}
+     */
+    getMainThreadId: (): number | undefined =>
+      parseInt(getEnv('TELEGRAM_MAIN_THREAD_ID', false)) || undefined,
+
+    /**
+     * Get group admin id
+     * @return {number | undefined}
+     */
+    getChatThreadId: (): number | undefined =>
+      parseInt(getEnv('TELEGRAM_CHAT_THREAD_ID', false)) || undefined,
   }),
 );
