@@ -80,10 +80,6 @@ export class OnSetGoalDoneHandler {
               player.telegramUserId
             }/goals/`;
 
-            logger.log({ playerContent });
-            logger.log({ uploadDir });
-            logger.log({ video: msg.video });
-
             if (!isEmpty(playerContent) && 'filePath' in playerContent) {
               const isFilePathExist = await isResourceExist(
                 playerContent.filePath,

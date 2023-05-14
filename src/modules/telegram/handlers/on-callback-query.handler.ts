@@ -8,6 +8,7 @@ import {
   isInArray,
   sortAscBy,
 } from '../../../common/utils/array.util';
+import { getRandomNumber } from '../../../common/utils/number.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { escapeString, isEmpty } from '../../../common/utils/string.util';
 import { GameplayConfigType } from '../../../configs/types/gameplay.config.type';
@@ -297,7 +298,7 @@ export class OnCallbackQueryHandler {
           caption: `${++index}. ⚽️ ${content.caption}`,
           file: `${config.getStaticContentUrl().replace('data', '')}${
             content.filePath
-          }`,
+          }?random=${getRandomNumber(1, 150)}`,
         });
       });
     });
@@ -342,14 +343,19 @@ export class OnCallbackQueryHandler {
           },
         );
       } else {
-        await content[round].reduce(async (p, content: PollType) => {
-          await bot.sendVideo(channelId, content.file, {
-            has_spoiler: true,
-            caption: content.caption,
-            message_thread_id: channelThreadId,
-            parse_mode: config.getMessageParseMode(),
-          });
-        }, Promise.resolve());
+        try {
+          await content[round].reduce(async (p, content: PollType) => {
+            await bot.sendVideo(channelId, content.file, {
+              has_spoiler: true,
+              caption: content.caption,
+              message_thread_id: channelThreadId,
+              parse_mode: config.getMessageParseMode(),
+            });
+          }, Promise.resolve());
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error({ channelId, content, error: e });
+        }
       }
       const result = await bot.sendPoll(
         channelId,
