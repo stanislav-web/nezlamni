@@ -354,6 +354,7 @@ export class OnCallbackQueryHandler {
           }, Promise.resolve());
         } catch (e) {
           // eslint-disable-next-line no-console
+          //@TODO
           console.error({ channelId, content, error: e });
         }
       }
