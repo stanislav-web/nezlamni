@@ -5,6 +5,7 @@ import {
   deleteResource,
   isResourceExist,
 } from '../../../common/utils/file.util';
+import { getRandomNumber } from '../../../common/utils/number.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { isEmpty } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
@@ -106,7 +107,10 @@ export class OnSetGoalDoneHandler {
             await bot.sendMessage(
               msg.chat.id,
               message(ON_SET_GOAL_DONE_MESSAGE, {
-                scheduleLink: `${config.getStaticContentUrl()}/examples/schedule.png`,
+                scheduleLink: `${config.getStaticContentUrl()}/examples/schedule.png?r=${getRandomNumber(
+                  1,
+                  100,
+                )}`,
               }),
               {
                 disable_web_page_preview: true,

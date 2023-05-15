@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import { findInArrayInsensitive } from '../../../common/utils/array.util';
+import { getRandomNumber } from '../../../common/utils/number.util';
 import { message } from '../../../common/utils/placeholder.util';
 import { isEmpty } from '../../../common/utils/string.util';
 import { TelegramConfigType } from '../../../configs/types/telegram.config.type';
@@ -96,7 +97,10 @@ export class OnSetNationDoneHandler {
                 msg.chat.id,
                 message(ON_SET_NATION_DONE_MESSAGE, {
                   country: country.name,
-                  scheduleLink: `${config.getStaticContentUrl()}/examples/schedule.png`,
+                  scheduleLink: `${config.getStaticContentUrl()}/examples/schedule.png?r=${getRandomNumber(
+                    1,
+                    100,
+                  )}`,
                 }),
                 {
                   message_thread_id: msg?.message_thread_id || undefined,
