@@ -353,7 +353,6 @@ export class OnCallbackQueryHandler {
             });
           }, Promise.resolve());
         } catch (e) {
-          // @TODO fix
           // eslint-disable-next-line no-console
           console.error({ channelId, content, error: e });
         }
