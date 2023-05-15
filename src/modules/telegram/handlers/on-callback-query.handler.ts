@@ -457,7 +457,12 @@ export class OnCallbackQueryHandler {
   ): Promise<TelegramBot.Message | void> {
     await bot.sendMessage(
       query.from.id,
-      message(`${config.getStaticContentUrl()}/examples/schedule.png`),
+      message(
+        `${config.getStaticContentUrl()}/examples/schedule.png?r=${getRandomNumber(
+          1,
+          100,
+        )}`,
+      ),
       {
         message_thread_id: query.message?.message_thread_id || undefined,
         parse_mode: config.getMessageParseMode(),
