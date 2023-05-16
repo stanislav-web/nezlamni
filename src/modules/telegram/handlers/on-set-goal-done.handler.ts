@@ -46,8 +46,7 @@ export class OnSetGoalDoneHandler {
       });
     } else {
       const regex = /^(ЧС|СК|ЛЧ|ЛЄ|ЛК|УПЛ|ПУЛ|ДУЛ),+.(.*)$/;
-      const caption = msg?.caption.trim();
-      if (!regex.test(caption)) {
+      if (!regex.test(msg.caption)) {
         await bot.sendMessage(
           msg.chat.id,
           message(ERROR_SET_GOAL_CAPTION_FORMAT),
@@ -57,6 +56,7 @@ export class OnSetGoalDoneHandler {
           },
         );
       } else {
+        const caption = msg.caption.trim();
         try {
           const player: Player = await playerRepository.findOne({
             telegramUserId: msg.from.id,
