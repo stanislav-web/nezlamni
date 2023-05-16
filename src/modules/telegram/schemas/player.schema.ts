@@ -24,7 +24,13 @@ export class Player {
   @Prop({ type: String, required: true })
   telegramFirstName: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({
+    type: String,
+    required: true,
+    set: (telegramUsername: string) => {
+      return telegramUsername.trim();
+    },
+  })
   telegramUsername: string;
 
   @Prop({ type: String, required: true })
