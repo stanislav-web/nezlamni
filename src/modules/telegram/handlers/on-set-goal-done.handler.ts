@@ -46,7 +46,7 @@ export class OnSetGoalDoneHandler {
       });
     } else {
       const regex = /^(ЧС|СК|ЛЧ|ЛЄ|ЛК|УПЛ|ПУЛ|ДУЛ),+.(.*)$/;
-      const caption = msg.caption.trim();
+      const caption = msg?.caption.trim();
       if (!regex.test(caption)) {
         await bot.sendMessage(
           msg.chat.id,
