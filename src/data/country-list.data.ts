@@ -373,7 +373,7 @@ export const countries: CountryListItemType[] = [
   { name: 'Saudi Arabia', dial_code: '+966', code: 'SA', flag: '🇸🇦' },
   { name: 'Senegal', dial_code: '+221', code: 'SN', flag: '🇸🇳' },
   { name: 'Serbia', dial_code: '+381', code: 'RS', flag: '🇷🇸' },
-  { name: 'Seychelles', dial_code: '+248', code: 'SC', flag: '🇸🇨' },
+  { name: 'Scotland', dial_code: '+44', code: 'SC', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
   { name: 'Sierra Leone', dial_code: '+232', code: 'SL', flag: '🇸🇱' },
   { name: 'Singapore', dial_code: '+65', code: 'SG', flag: '🇸🇬' },
   { name: 'Slovakia', dial_code: '+421', code: 'SK', flag: '🇸🇰' },
