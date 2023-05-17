@@ -113,7 +113,7 @@ export class NezlamniBotService {
       {
         polling: NezlamniBotService.config.isPooling()
           ? {
-              autoStart: false, //NezlamniBotService.config.isPoolingAutoStart(),
+              autoStart: NezlamniBotService.config.isPoolingAutoStart(),
               interval: NezlamniBotService.config.getPoolingInterval(),
               params: {
                 timeout: 10, //NezlamniBotService.config.getPoolingTimeout(),
