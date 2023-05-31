@@ -28,6 +28,7 @@ import {
   NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
+  REMOVE_PLAYER_COMMAND_PRIVATE,
   RULES_GROUP_PRIVATE,
   RULES_GROUP_PUBLIC,
 } from '../commands';
@@ -43,6 +44,7 @@ import {
   ON_INVITE_GROUP_MESSAGE,
   ON_POLL_FOR_GOAL_PREVIEW,
   ON_POLL_FOR_GOAL_START,
+  ON_REMOVE_PLAYER_MESSAGE,
   ON_SET_GOAL_MESSAGE,
   ON_SET_NATION_MESSAGE,
   ON_SET_NICKNAME_MESSAGE,
@@ -139,6 +141,13 @@ export class OnCallbackQueryHandler {
         case GOAL_POLL_COMMAND_PRIVATE.COMMAND:
           await OnCallbackQueryHandler.startGoalPoll(bot, query, config);
           break;
+        case REMOVE_PLAYER_COMMAND_PRIVATE.COMMAND:
+          await OnCallbackQueryHandler.removePlayerQueryHandler(
+            bot,
+            query,
+            config,
+          );
+          break;
         case PLAYERS_LIST_COMMAND_PRIVATE.COMMAND ||
           PLAYERS_LIST_COMMAND_PUBLIC.COMMAND:
           await OnCallbackQueryHandler.getPlayersListQueryHandler(
@@ -176,6 +185,26 @@ export class OnCallbackQueryHandler {
       await bot.sendMessage(query.from.id, message(ERROR_GAP_MESSAGE), {
         parse_mode: config.getMessageParseMode(),
         message_thread_id: query.message?.message_thread_id || undefined,
+      });
+    }
+  }
+
+  /**
+   * Check user permission
+   * @param {TelegramBot} bot
+   * @param {TelegramConfigType} config
+   * @param {CallbackQuery} query
+   * @private
+   */
+  private static async checkPermission(
+    bot: TelegramBot,
+    config: TelegramConfigType,
+    query: CallbackQuery,
+  ) {
+    if (false === isInArray(config.getGroupModeratorsIds(), query.from.id)) {
+      return await bot.sendMessage(query.from.id, message(ERROR_PERMISSIONS), {
+        parse_mode: config.getMessageParseMode(),
+        message_thread_id: query?.message.message_thread_id || undefined,
       });
     }
   }
@@ -256,12 +285,7 @@ export class OnCallbackQueryHandler {
     config: TelegramConfigType,
   ): Promise<TelegramBot.Message | void> {
     // Check permissions
-    if (false === isInArray(config.getGroupModeratorsIds(), query.from.id)) {
-      return await bot.sendMessage(query.from.id, message(ERROR_PERMISSIONS), {
-        parse_mode: config.getMessageParseMode(),
-        message_thread_id: query?.message.message_thread_id || undefined,
-      });
-    }
+    await OnCallbackQueryHandler.checkPermission(bot, config, query);
     const chat: TelegramBot.Chat = await bot.getChat(
       config.getNotificationChannel(),
     );
@@ -354,8 +378,7 @@ export class OnCallbackQueryHandler {
           }, Promise.resolve());
         } catch (e) {
           // eslint-disable-next-line no-console
-          //@TODO
-          console.error({ channelId, content, error: e });
+          console.error('ERROR POOL:', { channelId, content, error: e });
         }
       }
       const result = await bot.sendPoll(
@@ -383,6 +406,26 @@ export class OnCallbackQueryHandler {
         },
       );
     }
+  }
+
+  /**
+   * Remove player callback query handler
+   * @param {TelegramBot} bot
+   * @param {CallbackQuery} query
+   * @param  {TelegramConfigType} config
+   * @return Promise<TelegramBot.Message | void>
+   */
+  private static async removePlayerQueryHandler(
+    bot: TelegramBot,
+    query: CallbackQuery,
+    config: TelegramConfigType,
+  ): Promise<TelegramBot.Message | void> {
+    // Check permissions
+    await OnCallbackQueryHandler.checkPermission(bot, config, query);
+    return bot.sendMessage(query.from.id, message(ON_REMOVE_PLAYER_MESSAGE), {
+      message_thread_id: query.message?.message_thread_id || undefined,
+      parse_mode: config.getMessageParseMode(),
+    });
   }
 
   /**
@@ -490,7 +533,7 @@ export class OnCallbackQueryHandler {
   }
 
   /**
-   * Get rules callback query handler
+   * Get invite message callback query handler
    * @param {TelegramBot} bot
    * @param {CallbackQuery} query
    * @param {TelegramConfigType} config

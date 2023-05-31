@@ -17,6 +17,7 @@ import {
   NICKNAME_COMMAND_PUBLIC,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
+  REMOVE_PLAYER_COMMAND_PRIVATE,
   RULES_GROUP_PRIVATE,
   RULES_GROUP_PUBLIC,
   START_COMMAND,
@@ -38,6 +39,7 @@ import {
   OnStartHandler,
 } from '../handlers';
 import { OnGetChannelScheduleHandler } from '../handlers/on-get-channel-schedule.handler';
+import { OnRemovePlayerDoneHandler } from '../handlers/on-remove-player-done.handler';
 import { PlayerContentRepository } from '../repositories/player-content.repository';
 import { PlayerRepository } from '../repositories/player.repository';
 
@@ -116,7 +118,7 @@ export class NezlamniBotService {
               autoStart: NezlamniBotService.config.isPoolingAutoStart(),
               interval: NezlamniBotService.config.getPoolingInterval(),
               params: {
-                timeout: 10, //NezlamniBotService.config.getPoolingTimeout(),
+                timeout: NezlamniBotService.config.getPoolingTimeout(),
               },
             }
           : undefined,
@@ -433,6 +435,12 @@ export class NezlamniBotService {
           `${GOAL_COMMAND_PRIVATE.SESSION}${query.from.id}`,
           query.data,
         );
+
+      if (query.data === REMOVE_PLAYER_COMMAND_PRIVATE.COMMAND)
+        NezlamniBotService.session.put(
+          `${REMOVE_PLAYER_COMMAND_PRIVATE.SESSION}${query.from.id}`,
+          query.data,
+        );
       await OnCallbackQueryHandler.init(
         NezlamniBotService.bot,
         query,
@@ -460,6 +468,7 @@ export class NezlamniBotService {
       const sessionNicknameKey = `${NICKNAME_COMMAND_PRIVATE.SESSION}${msg.from.id}`;
       const sessionNationKey = `${NATION_COMMAND_PRIVATE.SESSION}${msg.from.id}`;
       const sessionGoalKey = `${GOAL_COMMAND_PRIVATE.SESSION}${msg.from.id}`;
+      const sessionRemovePlayerKey = `${REMOVE_PLAYER_COMMAND_PRIVATE.SESSION}${msg.from.id}`;
 
       if (NezlamniBotService.session.has(sessionNicknameKey)) {
         await OnSetNicknameDoneHandler.init(
@@ -489,6 +498,15 @@ export class NezlamniBotService {
           NezlamniBotService.logger,
         );
         NezlamniBotService.session.remove(sessionGoalKey);
+      } else if (NezlamniBotService.session.has(sessionRemovePlayerKey)) {
+        await OnRemovePlayerDoneHandler.init(
+          NezlamniBotService.bot,
+          msg,
+          NezlamniBotService.config,
+          NezlamniBotService.playerRepository,
+          NezlamniBotService.logger,
+        );
+        NezlamniBotService.session.remove(sessionRemovePlayerKey);
       }
     }
   }

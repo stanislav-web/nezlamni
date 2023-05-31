@@ -80,6 +80,13 @@ export const GOAL_POLL_COMMAND_PRIVATE = {
   BTN: '📊️ Розпочати голосування ⚽ (модер)',
 };
 
+export const REMOVE_PLAYER_COMMAND_PRIVATE = {
+  SESSION: 'remove_player_moder',
+  COMMAND: '/remove_player_moder',
+  REGEXP: /\/remove_player_moder$/,
+  BTN: '🟥 Видалити гравця (модер)',
+};
+
 export const RULES_GROUP_PRIVATE = {
   COMMAND: '/rules',
   REGEXP: /\/rules$/,

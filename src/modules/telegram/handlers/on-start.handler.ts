@@ -13,6 +13,7 @@ import {
   NICKNAME_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PRIVATE,
   PLAYERS_LIST_COMMAND_PUBLIC,
+  REMOVE_PLAYER_COMMAND_PRIVATE,
   RULES_GROUP_PRIVATE,
   RULES_GROUP_PUBLIC,
 } from '../commands';
@@ -94,6 +95,10 @@ export class OnStartHandler {
             {
               text: GOAL_POLL_COMMAND_PRIVATE.BTN,
               callback_data: GOAL_POLL_COMMAND_PRIVATE.COMMAND,
+            },
+            {
+              text: REMOVE_PLAYER_COMMAND_PRIVATE.BTN,
+              callback_data: REMOVE_PLAYER_COMMAND_PRIVATE.COMMAND,
             },
           ]);
 

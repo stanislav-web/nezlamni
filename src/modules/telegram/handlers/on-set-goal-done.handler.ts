@@ -45,7 +45,7 @@ export class OnSetGoalDoneHandler {
         parse_mode: config.getMessageParseMode(),
       });
     } else {
-      const regex = /^(ЧС|СК|ЛЧ|ЛЄ|ЛК|УПЛ|ПУЛ|ДУЛ),+.(.*)$/;
+      const regex = /^(ЧС|СК|ЛЧ|ЛЄ|КЧ|ЛК|УПЛ|ПУЛ|ДУЛ),+.(.*)$/;
       if (!regex.test(msg.caption)) {
         await bot.sendMessage(
           msg.chat.id,
@@ -101,7 +101,7 @@ export class OnSetGoalDoneHandler {
               type: PlayerContentTypeEnum.GOAL,
               caption,
               fileId: msg.video.file_id,
-              filePath: uploadedFile.toLowerCase(),
+              filePath: uploadedFile,
             });
 
             await bot.sendMessage(

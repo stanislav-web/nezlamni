@@ -28,6 +28,11 @@ import {
   ON_POLL_FOR_GOAL_PREVIEW,
   ON_POLL_FOR_GOAL_START,
 } from './on-poll-start.message';
+import {
+  ON_REMOVE_PLAYER_MESSAGE,
+  REMOVE_PLAYER_NOT_FOUND,
+  PLAYER_REMOVED,
+} from './on-remove-player.message';
 import { ON_SET_GOAL_DONE_MESSAGE } from './on-set-goal-done.message';
 import { ON_SET_GOAL_MESSAGE } from './on-set-goal.message';
 import { ON_SET_NATION_DONE_MESSAGE } from './on-set-nation-done.message';
@@ -54,6 +59,9 @@ export {
   ERROR_SET_NATION_RESTRICT,
   PLAYERS_LIST_MESSAGE,
   ERROR_SET_GOAL_RESTRICT,
+  REMOVE_PLAYER_NOT_FOUND,
+  PLAYER_REMOVED,
+  ON_REMOVE_PLAYER_MESSAGE,
   ERROR_GET_PLAYERS,
   ERROR_SET_NICKNAME,
   ON_COMMING_MESSAGE,
